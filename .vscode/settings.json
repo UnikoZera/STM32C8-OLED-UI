@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "*.c": "c",
+        "oled.h": "c",
+        "cstdint": "c",
+        "gpio.h": "c",
+        "math.h": "c",
+        "i2c.h": "c",
+        "stdio.h": "c",
+        "stdint.h": "c",
+        "string.h": "c",
+        "oled_ui.h": "c",
+        "STDIO.H": "cpp",
+        "MATH.H": "cpp"
+    }
+}
