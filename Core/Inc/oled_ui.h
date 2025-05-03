@@ -10,15 +10,32 @@
 
 #include "oled.h"
 #define MAX_ANIMATIONS 10
-typedef enum
-{
-    EASE_LINEAR,     // 线性缓动
-    EASE_IN_QUAD,    // 二次方缓入
-    EASE_OUT_QUAD,   // 二次方缓出
-    EASE_INOUT_QUAD, // 二次方缓入缓出
-    EASE_IN_CUBIC,   // 三次方缓入
-    EASE_OUT_CUBIC,  // 三次方缓出
-    EASE_INOUT_CUBIC // 三次方缓入缓出
+typedef enum {
+    EASE_LINEAR,      // 线性缓动
+    EASE_IN_QUAD,     // 二次方缓入
+    EASE_OUT_QUAD,    // 二次方缓出
+    EASE_INOUT_QUAD,  // 二次方缓入缓出
+    EASE_IN_CUBIC,    // 三次方缓入
+    EASE_OUT_CUBIC,   // 三次方缓出
+    EASE_INOUT_CUBIC, // 三次方缓入缓出
+    EASE_IN_EXPO,     // 指数缓入
+    EASE_OUT_EXPO,    // 指数缓出
+    EASE_INOUT_EXPO,  // 指数缓入缓出
+    EASE_IN_CIRC,     // 圆形曲线缓入
+    EASE_OUT_CIRC,    // 圆形曲线缓出
+    EASE_INOUT_CIRC,  // 圆形曲线缓入缓出
+    EASE_IN_ELASTIC,  // 弹性缓入
+    EASE_OUT_ELASTIC, // 弹性缓出
+    EASE_INOUT_ELASTIC,// 弹性缓入缓出
+    EASE_IN_BOUNCE,   // 反弹缓入
+    EASE_OUT_BOUNCE,  // 反弹缓出
+    EASE_INOUT_BOUNCE,// 反弹缓入缓出
+    EASE_IN_BACK,     // 背越式缓入
+    EASE_OUT_BACK,    // 背越式缓出
+    EASE_INOUT_BACK,  // 背越式缓入缓出
+    EASE_IN_SINE,     // 正弦缓入
+    EASE_OUT_SINE,    // 正弦缓出
+    EASE_INOUT_SINE   // 正弦缓入缓出
 } EaseType_t;
 
 typedef struct

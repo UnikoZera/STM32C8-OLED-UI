@@ -45,7 +45,167 @@ static float EaseInOutCubic(float t)
     return t < 0.5f ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 }
 
-// 获取缓动值
+// 在现有EaseType_t枚举中添加这些新类型
+// 指数缓动
+static float EaseInExpo(float t)
+{
+    return (t == 0) ? 0 : powf(2, 10 * (t - 1));
+}
+
+static float EaseOutExpo(float t)
+{
+    return (t == 1) ? 1 : (1 - powf(2, -10 * t));
+}
+
+static float EaseInOutExpo(float t)
+{
+    if (t == 0)
+        return 0;
+    if (t == 1)
+        return 1;
+    if (t < 0.5f)
+        return powf(2, 20 * t - 10) / 2;
+    return (2 - powf(2, -20 * t + 10)) / 2;
+}
+
+// 圆形曲线缓动
+static float EaseInCirc(float t)
+{
+    return 1 - sqrtf(1 - t * t);
+}
+
+static float EaseOutCirc(float t)
+{
+    return sqrtf(1 - powf(t - 1, 2));
+}
+
+static float EaseInOutCirc(float t)
+{
+    if (t < 0.5f)
+        return (1 - sqrtf(1 - powf(2 * t, 2))) / 2;
+    return (sqrtf(1 - powf(-2 * t + 2, 2)) + 1) / 2;
+}
+
+// 弹性缓动
+static float EaseInElastic(float t)
+{
+    const float c4 = (2 * 3.14159f) / 3;
+
+    if (t == 0)
+        return 0;
+    if (t == 1)
+        return 1;
+    return -powf(2, 10 * t - 10) * sinf((t * 10 - 10.75f) * c4);
+}
+
+static float EaseOutElastic(float t)
+{
+    const float c4 = (2 * 3.14159f) / 3;
+
+    if (t == 0)
+        return 0;
+    if (t == 1)
+        return 1;
+    return powf(2, -10 * t) * sinf((t * 10 - 0.75f) * c4) + 1;
+}
+
+static float EaseInOutElastic(float t)
+{
+    const float c5 = (2 * 3.14159f) / 4.5f;
+
+    if (t == 0)
+        return 0;
+    if (t == 1)
+        return 1;
+    if (t < 0.5f)
+        return -(powf(2, 20 * t - 10) * sinf((20 * t - 11.125f) * c5)) / 2;
+    return (powf(2, -20 * t + 10) * sinf((20 * t - 11.125f) * c5)) / 2 + 1;
+}
+
+static float EaseOutBounce(float t)
+{
+    const float n1 = 7.5625f;
+    const float d1 = 2.75f;
+
+    if (t < 1 / d1)
+    {
+        return n1 * t * t;
+    }
+    else if (t < 2 / d1)
+    {
+        t -= 1.5f / d1;
+        return n1 * t * t + 0.75f;
+    }
+    else if (t < 2.5f / d1)
+    {
+        t -= 2.25f / d1;
+        return n1 * t * t + 0.9375f;
+    }
+    else
+    {
+        t -= 2.625f / d1;
+        return n1 * t * t + 0.984375f;
+    }
+}
+
+// 反弹缓动
+static float EaseInBounce(float t)
+{
+    return 1 - EaseOutBounce(1 - t);
+}
+
+
+
+static float EaseInOutBounce(float t)
+{
+    if (t < 0.5f)
+        return EaseInBounce(t * 2) * 0.5f;
+    return EaseOutBounce(t * 2 - 1) * 0.5f + 0.5f;
+}
+
+// 背越式缓动
+static float EaseInBack(float t)
+{
+    const float c1 = 1.70158f;
+    const float c3 = c1 + 1;
+
+    return c3 * t * t * t - c1 * t * t;
+}
+
+static float EaseOutBack(float t)
+{
+    const float c1 = 1.70158f;
+    const float c3 = c1 + 1;
+
+    return 1 + c3 * powf(t - 1, 3) + c1 * powf(t - 1, 2);
+}
+
+static float EaseInOutBack(float t)
+{
+    const float c1 = 1.70158f;
+    const float c2 = c1 * 1.525f;
+
+    if (t < 0.5f)
+        return (powf(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2;
+    return (powf(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
+}
+
+// 正弦缓动
+static float EaseInSine(float t)
+{
+    return 1 - cosf((t * 3.14159f) / 2);
+}
+
+static float EaseOutSine(float t)
+{
+    return sinf((t * 3.14159f) / 2);
+}
+
+static float EaseInOutSine(float t)
+{
+    return -(cosf(3.14159f * t) - 1) / 2;
+}
+
 static float GetEaseValue(float progress, EaseType_t easeType)
 {
     switch (easeType)
@@ -64,6 +224,43 @@ static float GetEaseValue(float progress, EaseType_t easeType)
         return EaseOutCubic(progress);
     case EASE_INOUT_CUBIC:
         return EaseInOutCubic(progress);
+    // 新添加的缓动函数
+    case EASE_IN_EXPO:
+        return EaseInExpo(progress);
+    case EASE_OUT_EXPO:
+        return EaseOutExpo(progress);
+    case EASE_INOUT_EXPO:
+        return EaseInOutExpo(progress);
+    case EASE_IN_CIRC:
+        return EaseInCirc(progress);
+    case EASE_OUT_CIRC:
+        return EaseOutCirc(progress);
+    case EASE_INOUT_CIRC:
+        return EaseInOutCirc(progress);
+    case EASE_IN_ELASTIC:
+        return EaseInElastic(progress);
+    case EASE_OUT_ELASTIC:
+        return EaseOutElastic(progress);
+    case EASE_INOUT_ELASTIC:
+        return EaseInOutElastic(progress);
+    case EASE_IN_BOUNCE:
+        return EaseInBounce(progress);
+    case EASE_OUT_BOUNCE:
+        return EaseOutBounce(progress);
+    case EASE_INOUT_BOUNCE:
+        return EaseInOutBounce(progress);
+    case EASE_IN_BACK:
+        return EaseInBack(progress);
+    case EASE_OUT_BACK:
+        return EaseOutBack(progress);
+    case EASE_INOUT_BACK:
+        return EaseInOutBack(progress);
+    case EASE_IN_SINE:
+        return EaseInSine(progress);
+    case EASE_OUT_SINE:
+        return EaseOutSine(progress);
+    case EASE_INOUT_SINE:
+        return EaseInOutSine(progress);
     default:
         return progress;
     }
@@ -121,7 +318,7 @@ Animation_t blockXAnim, blockYAnim;
 void InitBlockAnimation()
 {
     // 设置方块从(0,0)移动到(100,40)，持续2秒，使用缓出三次方缓动
-    OLED_InitAnimation(&blockXAnim, 0, 100, 2000, EASE_IN_QUAD);
+    OLED_InitAnimation(&blockXAnim, 0, 100, 2000, EASE_OUT_BOUNCE);
     OLED_InitAnimation(&blockYAnim, 0, 40, 2000, EASE_OUT_CUBIC);
 }
 
@@ -145,7 +342,7 @@ void UpdateAndDrawBlock()
     OLED_DrawRectangle(x, y, 20, 20); // 绘制方块
 
     // 更新显示
-    OLED_UpdateDisplay();
+    OLED_UpdateDisplayVSync();
 }
 
 // 在主循环中调用
@@ -156,7 +353,6 @@ void AnimationLoop()
     while (1)
     {
         UpdateAndDrawBlock();
-        HAL_Delay(10); // 约60FPS的刷新率
 
         // 如果动画已完成，可以重新开始或执行其他操作
         if (!blockXAnim.isActive && !blockYAnim.isActive)

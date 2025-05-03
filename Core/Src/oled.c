@@ -8,9 +8,12 @@
 #include "oled.h"
 #define OLED_ADDR 0x3C // I2C for SSD1315
 
-// 屏幕缓冲区 - 用于双缓冲技术
+static volatile uint32_t oled_last_update_time = 0; // 上次更新显示的时间
+static volatile uint8_t oled_update_flag = 0;       // 更新标志位
+
 // 128 (宽) x 8 (页) = 1024 字节
-static uint8_t OLED_Buffer[128 * 8];
+uint8_t OLED_BackBuffer[128 * 8];
+uint8_t OLED_FrontBuffer[128 * 8];
 
 // ASCII 6x8 字体数组 (32-127字符)
 const uint8_t OLED_FONT_6x8[] = {
@@ -111,17 +114,65 @@ const uint8_t OLED_FONT_6x8[] = {
 void OLED_InitBuffer(void)
 {
     // 清空缓冲区
-    memset(OLED_Buffer, 0, sizeof(OLED_Buffer));
+    memset(OLED_BackBuffer, 0, sizeof(OLED_BackBuffer));
+    memset(OLED_FrontBuffer, 0, sizeof(OLED_FrontBuffer));
 }
 
 // 清空缓冲区
 void OLED_ClearBuffer(void)
 {
     // 重置缓冲区为全0 (全黑)
-    memset(OLED_Buffer, 0, sizeof(OLED_Buffer));
+    memset(OLED_BackBuffer, 0, sizeof(OLED_BackBuffer));
 }
 
-// 向缓冲区写入单个像素
+uint8_t OLED_IsBusy(void)
+{
+    // 如果标记为忙，检查是否已经过了足够时间
+    if (oled_update_flag)
+    {
+        // SSD1315/SSD1306 典型帧率约为60Hz，每帧约16.7ms
+        uint32_t current_time = HAL_GetTick();
+        if (current_time - oled_last_update_time >= 30)
+        {
+            oled_update_flag = 0; // 已经过了足够时间，不再忙
+        }
+    }
+    return oled_update_flag;
+}
+
+void OLED_UpdateDisplayVSync(void)
+{
+    while (OLED_IsBusy()) 
+    {
+
+    }
+    oled_update_flag = 1;
+    oled_last_update_time = HAL_GetTick();
+
+    // 交换前后缓冲区
+    memcpy(OLED_FrontBuffer, OLED_BackBuffer, 128 * 8); // 复制当前缓冲区到前缓冲区
+
+    // 将前缓冲区发送到显示器
+    uint8_t data[129]; // 数据缓冲区 (包括控制字节)
+    data[0] = 0x40;    // 数据控制字节
+
+    // 逐页发送数据，每页一次性发送整行
+    for (uint8_t page = 0; page < 8; page++)
+    {
+        // 设置页地址
+        OLED_SendCommand(0xB0 + page);
+        // 设置列起始地址
+        OLED_SendCommand(0x00); // 低位地址
+        OLED_SendCommand(0x10); // 高位地址
+
+        // 复制当前页到发送缓冲区
+        memcpy(data + 1, &OLED_FrontBuffer[page * OLED_WIDTH], OLED_WIDTH);
+
+        // 发送一整行数据
+        HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, data, OLED_WIDTH + 1, HAL_MAX_DELAY);
+    }
+}
+
 void OLED_WritePixel(uint8_t x, uint8_t y, uint8_t color)
 {
     // 边界检查
@@ -133,31 +184,9 @@ void OLED_WritePixel(uint8_t x, uint8_t y, uint8_t color)
     uint8_t bit_position = y % 8;
 
     if (color) // 如果需要点亮像素
-        OLED_Buffer[byte_index] |= (1 << bit_position);
+        OLED_BackBuffer[byte_index] |= (1 << bit_position);
     else // 如果需要熄灭像素
-        OLED_Buffer[byte_index] &= ~(1 << bit_position);
-}
-
-// 将缓冲区内容更新到屏幕
-void OLED_UpdateDisplay(void)
-{
-    uint8_t data[129]; // 数据缓冲区 (包括控制字节)
-    data[0] = 0x40;    // 数据控制字节
-
-    // 逐页发送数据，每页一次性发送整行
-    for (uint8_t page = 0; page < 8; page++)
-    {
-        // 设置页地址和起始列地址
-        OLED_SendCommand(0xB0 + page);
-        OLED_SendCommand(0x00); // 列起始地址低4位
-        OLED_SendCommand(0x10); // 列起始地址高4位
-
-        // 复制这一页的数据到传输缓冲区
-        memcpy(&data[1], &OLED_Buffer[page * 128], 128);
-
-        // 一次性发送整页数据
-        HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, data, 129, HAL_MAX_DELAY);
-    }
+        OLED_BackBuffer[byte_index] &= ~(1 << bit_position);
 }
 
 void OLED_SendCommand(uint8_t command)
@@ -179,7 +208,7 @@ void OLED_SendData(uint8_t data)
 void OLED_ClearDisplay(void)
 {
     OLED_ClearBuffer();
-    OLED_UpdateDisplay();
+    OLED_UpdateDisplayVSync();
 }
 
 // 更新OLED初始化函数来使用双缓冲
@@ -248,7 +277,7 @@ void OLED_InvertArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
             uint8_t bit_position = j % 8;
 
             // 反转该像素（将0变为1，1变为0）
-            OLED_Buffer[byte_index] ^= (1 << bit_position);
+            OLED_BackBuffer[byte_index] ^= (1 << bit_position);
         }
     }
 }
@@ -294,18 +323,18 @@ void OLED_DisplayChar(uint8_t x, uint8_t y, char ch) //! UPDATEDISPLAY REQUIRED
         if (bit_offset == 0)
         {
             // 字符刚好在页的起始位置，直接写入
-            OLED_Buffer[buffer_index] = font_data;
+            OLED_BackBuffer[buffer_index] = font_data;
         }
         else
         {
             // 字符跨页，分别处理上下两页
             // 当前页
-            OLED_Buffer[buffer_index] |= font_data << bit_offset;
+            OLED_BackBuffer[buffer_index] |= font_data << bit_offset;
 
             // 下一页（如果有）
             if (page < OLED_PAGES - 1)
             {
-                OLED_Buffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
+                OLED_BackBuffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
             }
         }
     }
@@ -349,20 +378,20 @@ void OLED_DisplayCharInverted(uint8_t x, uint8_t y, char ch, uint8_t inverted) /
         if (bit_offset == 0)
         {
             // 字符刚好在页的起始位置，直接写入
-            OLED_Buffer[buffer_index] = font_data;
+            OLED_BackBuffer[buffer_index] = font_data;
         }
         else
         {
             // 字符跨页，分别处理上下两页
             // 当前页 - 先清除当前位置，再写入
-            OLED_Buffer[buffer_index] &= ~(0xFF << bit_offset);
-            OLED_Buffer[buffer_index] |= font_data << bit_offset;
+            OLED_BackBuffer[buffer_index] &= ~(0xFF << bit_offset);
+            OLED_BackBuffer[buffer_index] |= font_data << bit_offset;
 
             // 下一页（如果有） - 先清除当前位置，再写入
             if (page < OLED_PAGES - 1)
             {
-                OLED_Buffer[buffer_index + OLED_WIDTH] &= ~(0xFF >> (8 - bit_offset));
-                OLED_Buffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
+                OLED_BackBuffer[buffer_index + OLED_WIDTH] &= ~(0xFF >> (8 - bit_offset));
+                OLED_BackBuffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
             }
         }
     }

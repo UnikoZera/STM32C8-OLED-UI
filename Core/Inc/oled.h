@@ -23,7 +23,7 @@
 // 双缓冲相关函数
 void OLED_InitBuffer(void);
 void OLED_ClearBuffer(void);
-void OLED_UpdateDisplay(void);                             // 将缓冲区内容更新到屏幕
+void OLED_UpdateDisplayVSync(void); // 更新显示，使用垂直同步
 void OLED_WritePixel(uint8_t x, uint8_t y, uint8_t color); // 写单个像素到缓冲区
 
 // 原始底层函数

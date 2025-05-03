@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
-#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -91,7 +90,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
@@ -99,26 +97,18 @@ int main(void)
 
   InitBlockAnimation(); // 初始化方块动画
   /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {    
-    // 清屏并绘制一些文本
     OLED_ClearBuffer();
 
-    OLED_DrawTitleBar("STM32 OLED Demo"); // 绘制标题栏
-    // for (int i = 0; i < 127; i++)
-    // {
-    //   // OLED_DrawBattery(0, 32, i);
-    //   // OLED_DrawProgressBar(0, 32, 64, i);
-    //   OLED_ClearBuffer(); // 清空缓冲区
-    //   OLED_DrawRectangle(i, 32, 64, 16); // 绘制矩形
-    //   OLED_UpdateDisplay(); // 更新显示
-    // }
-    // OLED_DrawLine(23, 14, 127, 63); // 绘制对角线
+    // OLED_DrawTitleBar("STM32 OLED Demo"); // 绘制标题栏
+
     AnimationLoop(); // 执行动画循环
 
-    OLED_UpdateDisplay();
+    OLED_UpdateDisplayVSync(); // 更新显示
     //  // HAL_Delay(1000); // 延时1秒
     //  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点亮LED
     //  // HAL_Delay(1000); // 延时1秒
