@@ -7,7 +7,7 @@
 
 #include "oled_ui.h"
 
-#pragma region TWEENS
+#pragma region TWEENS // 动画缓动函数全部在这里定义
 
 static float EaseLinear(float t)
 {
@@ -154,8 +154,6 @@ static float EaseInBounce(float t)
     return 1 - EaseOutBounce(1 - t);
 }
 
-
-
 static float EaseInOutBounce(float t)
 {
     if (t < 0.5f)
@@ -224,7 +222,6 @@ static float GetEaseValue(float progress, EaseType_t easeType)
         return EaseOutCubic(progress);
     case EASE_INOUT_CUBIC:
         return EaseInOutCubic(progress);
-    // 新添加的缓动函数
     case EASE_IN_EXPO:
         return EaseInExpo(progress);
     case EASE_OUT_EXPO:
@@ -265,8 +262,10 @@ static float GetEaseValue(float progress, EaseType_t easeType)
         return progress;
     }
 }
+#pragma endregion TWEENS
 
-// 初始化动画
+#pragma region ANIMATIONTWEENS
+// 这里是底层动画实现
 void OLED_InitAnimation(Animation_t *anim, float startValue, float endValue,
                         uint32_t duration, EaseType_t easeType)
 {
@@ -312,17 +311,16 @@ float OLED_GetAnimationValue(Animation_t *anim)
 {
     return anim->currentValue;
 }
+//结束底层动画
 
+//使用底层动画实现的方块动画
 Animation_t blockXAnim, blockYAnim;
-// 初始化方块动画
 void InitBlockAnimation()
 {
-    // 设置方块从(0,0)移动到(100,40)，持续2秒，使用缓出三次方缓动
-    OLED_InitAnimation(&blockXAnim, 0, 100, 2000, EASE_OUT_BOUNCE);
-    OLED_InitAnimation(&blockYAnim, 0, 40, 2000, EASE_OUT_CUBIC);
+    OLED_InitAnimation(&blockXAnim, 0, 100, 2000, EASE_OUT_EXPO);
+    OLED_InitAnimation(&blockYAnim, 0, 40, 2000, EASE_OUT_BOUNCE);
 }
 
-// 更新并绘制方块
 void UpdateAndDrawBlock()
 {
     uint32_t currentTime = HAL_GetTick();
@@ -345,7 +343,6 @@ void UpdateAndDrawBlock()
     OLED_UpdateDisplayVSync();
 }
 
-// 在主循环中调用
 void AnimationLoop()
 {
     InitBlockAnimation();
@@ -363,8 +360,94 @@ void AnimationLoop()
         }
     }
 }
+//结束使用底层动画实现的方块动画
 
-#pragma endregion TWEENS
+
+// 动画管理器全局管理部分
+AnimationManager_t g_AnimationManager; // 声明一个全局的动画管理器
+
+void OLED_InitAnimationManager(AnimationManager_t *manager) // 这是初始化一个动画管理器，填入你的manager名字，在系统初始化时候调用它
+{
+    manager->count = 0;
+    memset(manager->taggedAnimations, 0, sizeof(manager->taggedAnimations));
+}
+
+TaggedAnimation_t *OLED_FindTaggedAnimation(AnimationManager_t *manager, const char *tag)// 查找对应manager的标签对应的动画tag
+{
+    for (uint8_t i = 0; i < manager->count; i++)
+    {
+        if (strcmp(manager->taggedAnimations[i].tag, tag) == 0)
+        {
+            return &manager->taggedAnimations[i];
+        }
+    }
+    return NULL;
+}
+
+uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y)// 获取tag当前位置
+{
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+    if (anim)
+    {
+        if (x) *x = anim->currentX;
+        if (y) *y = anim->currentY;
+        return 1;
+    }
+    return 0;
+}
+
+// 移动指定标签的对象
+void OLED_MoveObject(AnimationManager_t *manager, const char *tag,
+                     float startX, float startY, float targetX, float targetY,
+                     uint32_t duration, EaseType_t easeType) // 这个函数是用来移动一个对象的，tag是对象的标签，startX和startY是起始坐标，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+{
+    // 查找已存在的动画
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+
+    // 如果没找到并且还有可用槽位，创建新的动画
+    if (anim == NULL)
+    {
+        if (manager->count >= MAX_ANIMATIONS)
+            return; // 动画已满，无法添加
+
+        anim = &manager->taggedAnimations[manager->count++];
+        strncpy(anim->tag, tag, sizeof(anim->tag) - 1);
+        anim->tag[sizeof(anim->tag) - 1] = '\0'; // 确保字符串结束
+        anim->currentX = startX;
+        anim->currentY = startY;
+    }
+
+    // 初始化或更新X和Y坐标的动画
+    OLED_InitAnimation(&anim->xAnimation, startX, targetX, duration, easeType);
+    OLED_InitAnimation(&anim->yAnimation, startY, targetY, duration, easeType);
+    anim->isActive = 1;
+}
+
+// 更新manager里面的所有动画!
+void OLED_UpdateAnimationManager(AnimationManager_t *manager) //! 这里需要使用OLED_UpdateDisplayVSync()来更新显示
+{
+    uint32_t currentTime = HAL_GetTick();
+    
+    for (uint8_t i = 0; i < manager->count; i++)
+    {
+        TaggedAnimation_t *anim = &manager->taggedAnimations[i];
+        if (!anim->isActive)
+            continue;
+            
+        uint8_t activeX = OLED_UpdateAnimation(&anim->xAnimation, currentTime);
+        uint8_t activeY = OLED_UpdateAnimation(&anim->yAnimation, currentTime);
+        
+        anim->currentX = OLED_GetAnimationValue(&anim->xAnimation);
+        anim->currentY = OLED_GetAnimationValue(&anim->yAnimation);
+        
+        // 如果两个动画都结束，则标记该对象动画为非活跃
+        if (!activeX && !activeY)
+            anim->isActive = 0;
+    }
+}
+
+
+#pragma endregion ANIMATIONTWEENS
 
 #pragma region OLED_EPICFUL_UI
 

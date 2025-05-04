@@ -95,7 +95,11 @@ int main(void)
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
 
-  InitBlockAnimation(); // 初始化方块动画
+  // InitBlockAnimation(); // 初始化方块动画
+  // AnimationLoop(); // 执行动画循环
+
+  OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
+  OLED_MoveObject(&g_AnimationManager, "player", 10, 20, 100, 30, 1000, EASE_OUT_BOUNCE); // 移动对象
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,9 +108,16 @@ int main(void)
   {    
     OLED_ClearBuffer();
 
-    // OLED_DrawTitleBar("STM32 OLED Demo"); // 绘制标题栏
+    OLED_UpdateAnimationManager(&g_AnimationManager);
 
-    AnimationLoop(); // 执行动画循环
+    // 绘制对象
+    float x, y;
+    if (OLED_GetObjectPosition(&g_AnimationManager, "player", &x, &y))
+    {
+        OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
+    }
+
+
 
     OLED_UpdateDisplayVSync(); // 更新显示
     //  // HAL_Delay(1000); // 延时1秒
@@ -135,7 +146,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -145,12 +158,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
