@@ -10,6 +10,8 @@
 #define MAX_ANIMATIONS 20 // Manager的最大动画数量(包含X、Y轴同时移动)
 
 #include "oled.h"
+#include <stdint.h>
+#include <stdbool.h>
 typedef enum
 {
     EASE_LINEAR,        // 线性缓动
@@ -84,7 +86,12 @@ void OLED_MoveObject(AnimationManager_t *manager, const char *tag,
 void OLED_UpdateAnimationManager(AnimationManager_t *manager);
 uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y);
 uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag); // 返回值是1表示活跃，0表示非活跃
-void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType, bool enablePrevMutiUseCalling); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+void OLED_MoveObjectAxis(AnimationManager_t *manager, const char *tag,
+                          float startX, float startY, float targetX, float targetY,
+                          uint32_t duration, EaseType_t easeType, bool onlyX, bool onlyY); // 为X或Y轴单独创建动画的函数
+void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float targetX, uint32_t duration, EaseType_t easeType); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+void OLED_DoTweenObjectY(AnimationManager_t *manager, const char *tag, float targetY, uint32_t duration, EaseType_t easeType); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
 
 // 这部分是为了不使用Manager的动画，方便后续的高度自定义封装的案例
 void InitBlockAnimation(void); // 不使用Manager的动画

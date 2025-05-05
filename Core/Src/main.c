@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -90,6 +91,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
@@ -99,20 +101,22 @@ int main(void)
   // AnimationLoop(); // 执行动画循环
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
-  OLED_MoveObject(&g_AnimationManager, "player", 10, 20, 10, 20, 1, EASE_OUT_BOUNCE); // 移动对象
-  OLED_MoveObject(&g_AnimationManager, "player1", 10, 20, 10, 20, 1, EASE_OUT_EXPO); // 移动对象
+  OLED_MoveObject(&g_AnimationManager, "player", 0, 0, 0, 0, 1, EASE_OUT_BOUNCE); // 这里可以是初始化
+  OLED_MoveObject(&g_AnimationManager, "player1", 128, 64, 100, 30, 1, EASE_IN_BOUNCE); // 这里可以是初始化
 
+  OLED_DoTweenObjectX(&g_AnimationManager, "player1", 0, 3000, EASE_IN_BOUNCE); // 移动对象
+  OLED_DoTweenObjectY(&g_AnimationManager, "player1", 0, 3000, EASE_IN_CUBIC); // 移动对象
   /* USER CODE END 2 */
-
+  
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {    
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
+    
+    OLED_DoTweenObject(&g_AnimationManager, "player", 128, 64, 4000, EASE_IN_BOUNCE, 1);
 
-    OLED_DoTweenObject(&g_AnimationManager, "player", 100, 50, 1000, EASE_OUT_BOUNCE); // 移动对象
-    OLED_DoTweenObject(&g_AnimationManager, "player1", 50, 50, 1000, EASE_OUT_EXPO); // 移动对象
     
     if (OLED_GetObjectPosition(&g_AnimationManager, "player", &x, &y))
     {
@@ -130,7 +134,7 @@ int main(void)
     //     OLED_MoveObject(&g_AnimationManager, "player1", x, y, 10, 20, 1000, EASE_OUT_BOUNCE); // 移动对象
     // }
 
-    OLED_InvertArea(64, 16, 64, 48); //
+    // OLED_InvertArea(64, 16, 64, 48); //
 
 
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器

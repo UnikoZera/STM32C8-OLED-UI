@@ -6,7 +6,6 @@
  */
 
 #include "oled_ui.h"
-#include "stdbool.h"
 
 #pragma region TWEENS // 动画缓动函数全部在这里定义
 
@@ -290,7 +289,7 @@ void OLED_InitAnimation(Animation_t *anim, float startValue, float endValue,
     anim->easeType = easeType;
 }
 
-// 更新动画状态
+// 更新动画状态，返回isActive的值
 uint8_t OLED_UpdateAnimation(Animation_t *anim, uint32_t currentTime)
 {
     if (!anim->isActive)
@@ -299,7 +298,7 @@ uint8_t OLED_UpdateAnimation(Animation_t *anim, uint32_t currentTime)
     uint32_t elapsedTime = currentTime - anim->startTime;
 
     // 动画完成
-    if (elapsedTime >= anim->duration)
+    if (elapsedTime >= anim->duration || anim->currentValue == anim->endValue) // 如果我的目标在指定的点上，也关闭isActive
     {
         anim->currentValue = anim->endValue;
         anim->isActive = 0;
@@ -469,25 +468,78 @@ uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag) //
     return 0; // 如果没有找到，返回0表示非活跃
 }
 
-void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType) // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+// 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型 bool为是可以在while循环里面使用，如果不使用就不需要函数OLED_UpdateAnimationManager就可以使用
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType, bool enablePrevMutiUseCalling)
 {
-    bool SWITCH; // 这个是在while里面循环并且防止死循环的开关
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
-
-    if (anim && (anim->currentX != targetX || anim->currentY != targetY) && !(anim->isActive))
+    if (enablePrevMutiUseCalling)
     {
-        SWITCH = 1;
+        if (anim && !(anim->isActive)) // 找到了动画，而且它不是正在tween的时候
+        {
+            OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
+        }
     }
     else
     {
-        SWITCH = 0;
-    }
-
-    if (anim && !(anim->isActive) && SWITCH) // 找到了动画，而且它不是正在tween的时候
-    {
-        OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
+        if (anim && (anim->currentX != targetX || anim->currentY != targetY))
+        {
+            OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
+        }
     }
 }
+
+// 为X或Y轴单独创建动画的函数
+void OLED_MoveObjectAxis(AnimationManager_t *manager, const char *tag,
+                         float startX, float startY, float targetX, float targetY,
+                         uint32_t duration, EaseType_t easeType, bool onlyX, bool onlyY)
+{
+    // 查找已存在的动画
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+
+    // 如果没找到并且还有可用槽位，创建新的动画
+    if (anim == NULL)
+    {
+        if (manager->count >= MAX_ANIMATIONS)
+            return; // 动画已满，无法添加
+
+        anim = &manager->taggedAnimations[manager->count++];
+        strncpy(anim->tag, tag, sizeof(anim->tag) - 1);
+        anim->tag[sizeof(anim->tag) - 1] = '\0'; // 确保字符串结束
+        anim->currentX = startX;
+        anim->currentY = startY;
+    }
+
+    // 只初始化需要的轴的动画
+    if (!onlyY) // 如果不是只修改Y轴，就修改X轴
+        OLED_InitAnimation(&anim->xAnimation, startX, targetX, duration, easeType);
+    if (!onlyX) // 如果不是只修改X轴，就修改Y轴
+        OLED_InitAnimation(&anim->yAnimation, startY, targetY, duration, easeType);
+
+    anim->isActive = 1;
+}
+
+// 这个函数是用来移动一个对象的，tag是对象的标签，targetX是目标坐标，duration是动画持续时间，easeType是缓动类型
+//!这里不可以在while里面调用！为一次性调用，不需要OLED_UpdateAnimationManager
+void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float targetX, uint32_t duration, EaseType_t easeType)
+{
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+    if (anim && anim->currentX != targetX)
+    {
+        OLED_MoveObjectAxis(manager, tag, anim->currentX, anim->currentY, targetX, anim->currentY, duration, easeType, true, false);
+    }
+}
+
+// 这个函数是用来移动一个对象的，tag是对象的标签，targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+//!这里不可以在while里面调用！为一次性调用，不需要OLED_UpdateAnimationManager
+void OLED_DoTweenObjectY(AnimationManager_t *manager, const char *tag, float targetY, uint32_t duration, EaseType_t easeType)
+{
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+    if (anim && anim->currentY != targetY)
+    {
+        OLED_MoveObjectAxis(manager, tag, anim->currentX, anim->currentY, anim->currentX, targetY, duration, easeType, false, true);
+    }
+}
+
 #pragma endregion ANIMATIONTWEENS
 
 #pragma region OLED_EPICFUL_UI
