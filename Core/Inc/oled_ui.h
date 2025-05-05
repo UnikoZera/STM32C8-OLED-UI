@@ -7,6 +7,7 @@
 
 #ifndef INC_OLED_UI_H_
 #define INC_OLED_UI_H_
+#define MAX_ANIMATIONS 20 // Manager的最大动画数量(包含X、Y轴同时移动)
 
 #include "oled.h"
 typedef enum
@@ -47,7 +48,7 @@ typedef struct
     float currentValue;  // 当前值
     uint8_t isActive;    // 动画是否活跃
     EaseType_t easeType; // 缓动类型
-} Animation_t; // 动画对象结构体，包含起始时间、持续时间、起始值、结束值、当前值、活跃状态和缓动类型，是最底层的部分
+} Animation_t;           // 动画对象结构体，包含起始时间、持续时间、起始值、结束值、当前值、活跃状态和缓动类型，是最底层的部分
 
 typedef struct
 {
@@ -57,9 +58,8 @@ typedef struct
     uint8_t isActive;       // 是否活跃
     float currentX;         // 当前X坐标
     float currentY;         // 当前Y坐标
-} TaggedAnimation_t; // 带标签的动画对象结构体，包含X和Y坐标动画以及当前坐标和活跃状态
+} TaggedAnimation_t;        // 带标签的动画对象结构体，包含X和Y坐标动画以及当前坐标和活跃状态
 
-#define MAX_ANIMATIONS 20 // 最大动画数量(包含X、Y轴同时移动)
 typedef struct
 {
     TaggedAnimation_t taggedAnimations[MAX_ANIMATIONS];
@@ -67,6 +67,10 @@ typedef struct
 } AnimationManager_t; // 动画管理器结构体，每个动画对象都有一个标签和两个动画（X和Y坐标）他包含了多个动画对象的数组和一个计数器，表示当前动画对象的数量
 
 extern AnimationManager_t g_AnimationManager; // 动画管理器实例
+
+#pragma region funcs// 动画函数声明
+
+float MathLerp(float start, float end, float t); //* start是起始值，end是结束值，t是插值因子，返回值是插值结果
 
 void OLED_InitAnimation(Animation_t *anim, float startValue, float endValue,
                         uint32_t duration, EaseType_t easeType);
@@ -79,11 +83,13 @@ void OLED_MoveObject(AnimationManager_t *manager, const char *tag,
                      uint32_t duration, EaseType_t easeType);
 void OLED_UpdateAnimationManager(AnimationManager_t *manager);
 uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y);
+uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag); // 返回值是1表示活跃，0表示非活跃
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
 
-//这部分是为了不使用Manager的动画，方便后续的高度自定义封装的案例
+// 这部分是为了不使用Manager的动画，方便后续的高度自定义封装的案例
 void InitBlockAnimation(void); // 不使用Manager的动画
-void UpdateAndDrawBlock(void); //不使用Manager的动画
-void AnimationLoop(void); // 不使用Manager的动画
+void UpdateAndDrawBlock(void); // 不使用Manager的动画
+void AnimationLoop(void);      // 不使用Manager的动画
 
 // UI绘图函数
 void OLED_DrawTitleBar(char *title);
@@ -93,5 +99,6 @@ void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void OLED_DrawFilledRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color);
 void OLED_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 void OLED_InvertArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+#pragma endregion funcs
 
 #endif /* INC_OLED_UI_H_ */

@@ -8,10 +8,10 @@
 ../Core/Src/oled.c:208:6:OLED_ClearDisplay	1
 ../Core/Src/oled.c:215:6:OLED_Init	1
 ../Core/Src/oled.c:257:6:OLED_InvertArea	9
-../Core/Src/oled.c:286:6:OLED_SetCursor	1
-../Core/Src/oled.c:293:6:OLED_DisplayChar	9
-../Core/Src/oled.c:343:6:OLED_DisplayCharInverted	10
-../Core/Src/oled.c:400:6:OLED_DisplayString	3
-../Core/Src/oled.c:416:6:OLED_DisplayStringInverted	3
-../Core/Src/oled.c:433:6:OLED_DisplayInteger	1
-../Core/Src/oled.c:441:6:OLED_DisplayFloat	3
+../Core/Src/oled.c:285:6:OLED_SetCursor	1
+../Core/Src/oled.c:292:6:OLED_DisplayChar	9
+../Core/Src/oled.c:342:6:OLED_DisplayCharInverted	10
+../Core/Src/oled.c:399:6:OLED_DisplayString	3
+../Core/Src/oled.c:415:6:OLED_DisplayStringInverted	3
+../Core/Src/oled.c:431:6:OLED_DisplayInteger	1
+../Core/Src/oled.c:438:6:OLED_DisplayFloat	3

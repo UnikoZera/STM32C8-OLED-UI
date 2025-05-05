@@ -282,7 +282,6 @@ void OLED_InvertArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
     }
 }
 
-// 设置光标位置
 void OLED_SetCursor(uint8_t x, uint8_t y)
 {
     OLED_SendCommand(0xB0 + y);                 // 设置页地址 (0-7)
@@ -429,7 +428,6 @@ void OLED_DisplayStringInverted(uint8_t x, uint8_t y, char *str, uint8_t inverte
     }
 }
 
-// 显示整数 (使用双缓冲)
 void OLED_DisplayInteger(uint8_t x, uint8_t y, int number) //! UPDATEDISPLAY REQUIRED
 {
     char str[12];
@@ -437,7 +435,6 @@ void OLED_DisplayInteger(uint8_t x, uint8_t y, int number) //! UPDATEDISPLAY REQ
     OLED_DisplayString(x, y, str);
 }
 
-// 显示浮点数 (使用双缓冲)
 void OLED_DisplayFloat(uint8_t x, uint8_t y, float number) //! UPDATEDISPLAY REQUIRED
 {
     char str[32];

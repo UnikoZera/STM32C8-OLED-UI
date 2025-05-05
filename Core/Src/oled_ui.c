@@ -6,6 +6,7 @@
  */
 
 #include "oled_ui.h"
+#include "stdbool.h"
 
 #pragma region TWEENS // 动画缓动函数全部在这里定义
 
@@ -262,6 +263,17 @@ static float GetEaseValue(float progress, EaseType_t easeType)
         return progress;
     }
 }
+
+float MathLerp(float start, float end, float t) //* 线性插值函数可以用来在两个值之间进行插值，t的范围是0到1
+//* start是起始值，end是结束值，t是插值因子，返回值是插值结果
+{
+    if (t < 0.0f)
+        t = 0.0f;
+    if (t > 1.0f)
+        t = 1.0f;
+    return start + t * (end - start);
+}
+
 #pragma endregion TWEENS
 
 #pragma region ANIMATIONTWEENS
@@ -311,9 +323,9 @@ float OLED_GetAnimationValue(Animation_t *anim)
 {
     return anim->currentValue;
 }
-//结束底层动画
+// 结束底层动画
 
-//使用底层动画实现的方块动画
+// 使用底层动画实现的方块动画
 Animation_t blockXAnim, blockYAnim;
 void InitBlockAnimation()
 {
@@ -360,8 +372,7 @@ void AnimationLoop()
         }
     }
 }
-//结束使用底层动画实现的方块动画
-
+// 结束使用底层动画实现的方块动画
 
 // 动画管理器全局管理部分
 AnimationManager_t g_AnimationManager; // 声明一个全局的动画管理器
@@ -372,7 +383,7 @@ void OLED_InitAnimationManager(AnimationManager_t *manager) // 这是初始化�
     memset(manager->taggedAnimations, 0, sizeof(manager->taggedAnimations));
 }
 
-TaggedAnimation_t *OLED_FindTaggedAnimation(AnimationManager_t *manager, const char *tag)// 查找对应manager的标签对应的动画tag
+TaggedAnimation_t *OLED_FindTaggedAnimation(AnimationManager_t *manager, const char *tag) // 查找对应manager的标签对应的动画tag
 {
     for (uint8_t i = 0; i < manager->count; i++)
     {
@@ -384,13 +395,15 @@ TaggedAnimation_t *OLED_FindTaggedAnimation(AnimationManager_t *manager, const c
     return NULL;
 }
 
-uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y)// 获取tag当前位置
+uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y) // 获取tag当前位置
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
     if (anim)
     {
-        if (x) *x = anim->currentX;
-        if (y) *y = anim->currentY;
+        if (x)
+            *x = anim->currentX;
+        if (y)
+            *y = anim->currentY;
         return 1;
     }
     return 0;
@@ -427,26 +440,54 @@ void OLED_MoveObject(AnimationManager_t *manager, const char *tag,
 void OLED_UpdateAnimationManager(AnimationManager_t *manager) //! 这里需要使用OLED_UpdateDisplayVSync()来更新显示
 {
     uint32_t currentTime = HAL_GetTick();
-    
+
     for (uint8_t i = 0; i < manager->count; i++)
     {
         TaggedAnimation_t *anim = &manager->taggedAnimations[i];
         if (!anim->isActive)
             continue;
-            
+
         uint8_t activeX = OLED_UpdateAnimation(&anim->xAnimation, currentTime);
         uint8_t activeY = OLED_UpdateAnimation(&anim->yAnimation, currentTime);
-        
+
         anim->currentX = OLED_GetAnimationValue(&anim->xAnimation);
         anim->currentY = OLED_GetAnimationValue(&anim->yAnimation);
-        
+
         // 如果两个动画都结束，则标记该对象动画为非活跃
         if (!activeX && !activeY)
             anim->isActive = 0;
     }
 }
 
+uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag) // 返回值是1表示活跃，0表示非活跃
+{
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+    if (anim)
+    {
+        return anim->isActive;
+    }
+    return 0; // 如果没有找到，返回0表示非活跃
+}
 
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType) // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+{
+    bool SWITCH; // 这个是在while里面循环并且防止死循环的开关
+    TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
+
+    if (anim && (anim->currentX != targetX || anim->currentY != targetY) && !(anim->isActive))
+    {
+        SWITCH = 1;
+    }
+    else
+    {
+        SWITCH = 0;
+    }
+
+    if (anim && !(anim->isActive) && SWITCH) // 找到了动画，而且它不是正在tween的时候
+    {
+        OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
+    }
+}
 #pragma endregion ANIMATIONTWEENS
 
 #pragma region OLED_EPICFUL_UI

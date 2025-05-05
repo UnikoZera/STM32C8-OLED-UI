@@ -68,7 +68,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  float x, y;//这个是为了获取动画坐标初始值的中间变量
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -99,27 +99,43 @@ int main(void)
   // AnimationLoop(); // 执行动画循环
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
-  OLED_MoveObject(&g_AnimationManager, "player", 10, 20, 100, 30, 1000, EASE_OUT_BOUNCE); // 移动对象
+  OLED_MoveObject(&g_AnimationManager, "player", 10, 20, 10, 20, 1, EASE_OUT_BOUNCE); // 移动对象
+  OLED_MoveObject(&g_AnimationManager, "player1", 10, 20, 10, 20, 1, EASE_OUT_EXPO); // 移动对象
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {    
+    #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
 
-    OLED_UpdateAnimationManager(&g_AnimationManager);
-
-    // 绘制对象
-    float x, y;
+    OLED_DoTweenObject(&g_AnimationManager, "player", 100, 50, 1000, EASE_OUT_BOUNCE); // 移动对象
+    OLED_DoTweenObject(&g_AnimationManager, "player1", 50, 50, 1000, EASE_OUT_EXPO); // 移动对象
+    
     if (OLED_GetObjectPosition(&g_AnimationManager, "player", &x, &y))
     {
         OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
     }
 
+    if (OLED_GetObjectPosition(&g_AnimationManager, "player1", &x, &y))
+    {
+        OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
+    }
+
+    // if (!OLED_GetAnimationStates(&g_AnimationManager, "player1")) // 检查动画是否活跃
+    // {
+    //     OLED_GetObjectPosition(&g_AnimationManager, "player1", &x, &y); // 获取当前坐标
+    //     OLED_MoveObject(&g_AnimationManager, "player1", x, y, 10, 20, 1000, EASE_OUT_BOUNCE); // 移动对象
+    // }
+
+    OLED_InvertArea(64, 16, 64, 48); //
 
 
+    OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
     OLED_UpdateDisplayVSync(); // 更新显示
+    #pragma endregion OLED_UI_SETTINGS
     //  // HAL_Delay(1000); // 延时1秒
     //  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点亮LED
     //  // HAL_Delay(1000); // 延时1秒
