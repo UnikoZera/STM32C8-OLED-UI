@@ -38,7 +38,7 @@ void OLED_DisplayChar(uint8_t x, uint8_t y, char ch);
 void OLED_DisplayString(uint8_t x, uint8_t y, char *str);
 void OLED_DisplayInteger(uint8_t x, uint8_t y, int num);
 void OLED_DisplayFloat(uint8_t x, uint8_t y, float number);
-
+void OLED_DisplayFPS();
 // 反色文本绘制功能
 void OLED_DisplayCharInverted(uint8_t x, uint8_t y, char ch, uint8_t inverted);
 void OLED_DisplayStringInverted(uint8_t x, uint8_t y, char *str, uint8_t inverted);

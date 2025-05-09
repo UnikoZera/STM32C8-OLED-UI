@@ -68,7 +68,9 @@ typedef struct
     uint8_t count;
 } AnimationManager_t; // 动画管理器结构体，每个动画对象都有一个标签和两个动画（X和Y坐标）他包含了多个动画对象的数组和一个计数器，表示当前动画对象的数量
 
-extern AnimationManager_t g_AnimationManager; // 动画管理器实例
+extern AnimationManager_t Menu_AnimationManager;
+extern AnimationManager_t Cursor_AnimationManager;
+extern AnimationManager_t g_AnimationManager; // 全局动画管理器
 
 #pragma region funcs// 动画函数声明
 
@@ -102,10 +104,11 @@ void AnimationLoop(void);      // 不使用Manager的动画
 void OLED_DrawTitleBar(char *title);
 void OLED_DrawBattery(uint8_t x, uint8_t y, uint8_t percentage);
 void OLED_DrawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t percent);
-void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void OLED_DrawFilledRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color);
+void OLED_DrawRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height);
+void OLED_DrawFilledRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height, uint8_t color);
 void OLED_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 void OLED_InvertArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+
 #pragma endregion funcs
 
 #endif /* INC_OLED_UI_H_ */

@@ -2,6 +2,7 @@
 "./Core/Src/i2c.o"
 "./Core/Src/main.o"
 "./Core/Src/oled.o"
+"./Core/Src/oled_driver.o"
 "./Core/Src/oled_ui.o"
 "./Core/Src/pid.o"
 "./Core/Src/spi.o"

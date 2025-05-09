@@ -8,12 +8,12 @@
 #include "oled.h"
 #define OLED_ADDR 0x3C // I2C for SSD1315
 
-static volatile uint32_t oled_last_update_time = 0; // 上次更新显示的时间
-static volatile uint8_t oled_update_flag = 0;       // 更新标志位
+// static volatile uint32_t oled_last_update_time = 0; // 上次更新显示的时间
+// static volatile uint8_t oled_update_flag = 0;       // 更新标志位
 
 // 128 (宽) x 8 (页) = 1024 字节
 uint8_t OLED_BackBuffer[128 * 8];
-uint8_t OLED_FrontBuffer[128 * 8];
+uint8_t OLED_FrontBuffer[128 * 8 + 1];
 
 // ASCII 6x8 字体数组 (32-127字符)
 const uint8_t OLED_FONT_6x8[] = {
@@ -110,6 +110,13 @@ const uint8_t OLED_FONT_6x8[] = {
     0x44, 0x64, 0x54, 0x4C, 0x44, 0x00  // z (122)
 };
 
+uint8_t cmds[] = 
+{
+    0x20, 0x00,       // 水平寻址模式
+    0x21, 0x00, 0x7F, // 列地址范围: 0-127
+    0x22, 0x00, 0x07  // 页地址范围: 0-7
+};
+
 // 初始化缓冲区
 void OLED_InitBuffer(void)
 {
@@ -125,52 +132,42 @@ void OLED_ClearBuffer(void)
     memset(OLED_BackBuffer, 0, sizeof(OLED_BackBuffer));
 }
 
-uint8_t OLED_IsBusy(void)
-{
-    // 如果标记为忙，检查是否已经过了足够时间
-    if (oled_update_flag)
-    {
-        // SSD1315/SSD1306 典型帧率约为60Hz，每帧约16.7ms
-        uint32_t current_time = HAL_GetTick();
-        if (current_time - oled_last_update_time >= 2)
-        {
-            oled_update_flag = 0; // 已经过了足够时间，不再忙
-        }
-    }
-    return oled_update_flag;
-}
+// uint8_t OLED_IsBusy(void)
+// {
+//     // 如果标记为忙，检查是否已经过了足够时间
+//     if (oled_update_flag)
+//     {
+//         // SSD1315/SSD1306 典型帧率约为60Hz，每帧约16.7ms
+//         uint32_t current_time = HAL_GetTick();
+//         if (current_time - oled_last_update_time >= 16)//在这里更改
+//         {
+//             oled_update_flag = 0; // 已经过了足够时间，不再忙
+//         }
+//     }
+//     return oled_update_flag;
+// }
 
 void OLED_UpdateDisplayVSync(void)
 {
-    while (OLED_IsBusy()) 
-    {
+    // while (OLED_IsBusy())
+    // {
 
-    }
-    oled_update_flag = 1;
-    oled_last_update_time = HAL_GetTick();
+    // }
+    // oled_update_flag = 1;
+    // oled_last_update_time = HAL_GetTick();
 
     // 交换前后缓冲区
-    memcpy(OLED_FrontBuffer, OLED_BackBuffer, 128 * 8); // 复制当前缓冲区到前缓冲区
+    OLED_FrontBuffer[0] = 0x40;
+    memcpy(OLED_FrontBuffer + 1, OLED_BackBuffer, 128 * 8); // 复制当前缓冲区到前缓冲区
 
-    // 将前缓冲区发送到显示器
-    uint8_t data[129]; // 数据缓冲区 (包括控制字节)
-    data[0] = 0x40;    // 数据控制字节
-
-    // 逐页发送数据，每页一次性发送整行
-    for (uint8_t page = 0; page < 8; page++)
+    // 一次性发送所有命令
+    for (uint8_t i = 0; i < sizeof(cmds); i++)
     {
-        // 设置页地址
-        OLED_SendCommand(0xB0 + page);
-        // 设置列起始地址
-        OLED_SendCommand(0x00); // 低位地址
-        OLED_SendCommand(0x10); // 高位地址
-
-        // 复制当前页到发送缓冲区
-        memcpy(data + 1, &OLED_FrontBuffer[page * OLED_WIDTH], OLED_WIDTH);
-
-        // 发送一整行数据
-        HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, data, OLED_WIDTH + 1, HAL_MAX_DELAY);
+        OLED_SendCommand(cmds[i]);
     }
+
+    // 一次发送全部数据
+    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, 1025, HAL_MAX_DELAY);
 }
 
 void OLED_WritePixel(uint8_t x, uint8_t y, uint8_t color)
@@ -456,4 +453,21 @@ void OLED_DisplayFloat(uint8_t x, uint8_t y, float number) //! UPDATEDISPLAY REQ
     }
 
     OLED_DisplayString(x, y, str);
+}
+
+void OLED_DisplayFPS() //! UPDATEDISPLAY REQUIRED
+{
+    static uint32_t last_time = 0;
+    static uint32_t frame_count = 0;
+    static char fps_str[16];
+    frame_count++;
+
+    // 每秒更新一次FPS
+    if (HAL_GetTick() - last_time >= 1000)
+    {
+        sprintf(fps_str, "FPS:%d", frame_count);
+        frame_count = 0;
+        last_time = HAL_GetTick();
+    }
+    OLED_DisplayString(80, 56, fps_str);
 }

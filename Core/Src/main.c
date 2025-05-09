@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "oled.h"
 #include "oled_ui.h"
+#include "oled_driver.h"
 #include "pid.h"
 /* USER CODE END Includes */
 
@@ -95,8 +96,8 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM1_Init();
   MX_I2C2_Init();
-  MX_SPI2_Init();
   MX_TIM3_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
@@ -108,8 +109,8 @@ int main(void)
   // AnimationLoop(); // 执行动画循环
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
-  OLED_MoveObject(&g_AnimationManager, "player", 0, 0, 0, 0, 1, EASE_OUT_BOUNCE); // 这里可以是初始化
-  OLED_MoveObject(&g_AnimationManager, "player1", 128, 64, 100, 30, 1, EASE_IN_BOUNCE); // 这里可以是初始化
+  OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
+  OLED_InitAnimationManager(&Cursor_AnimationManager); // 初始化光标动画管理器
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,23 +119,12 @@ int main(void)
   {    
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
-    
-    OLED_DoTweenObject(&g_AnimationManager, "player", 128, 64, 4000, EASE_INOUT_BOUNCE, true);
 
-    if (OLED_GetObjectPosition(&g_AnimationManager, "player", &x, &y))
-    {
-        OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
-    }
-
-    if (OLED_GetObjectPosition(&g_AnimationManager, "player1", &x, &y))
-    {
-        OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
-    }
-
-    OLED_InvertArea(64, 16, 64, 48); //
-
-
+    System_UI_Loop(); // UI循环
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
+    OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
+    OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
+    OLED_DisplayFPS(); // 显示FPS
     OLED_UpdateDisplayVSync(); // 更新显示
     #pragma endregion OLED_UI_SETTINGS
 

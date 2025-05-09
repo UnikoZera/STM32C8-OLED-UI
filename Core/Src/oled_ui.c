@@ -6,7 +6,6 @@
  */
 
 #include "oled_ui.h"
-
 #pragma region TWEENS // 动画缓动函数全部在这里定义
 
 static float EaseLinear(float t)
@@ -374,7 +373,9 @@ void AnimationLoop()
 // 结束使用底层动画实现的方块动画
 
 // 动画管理器全局管理部分
-AnimationManager_t g_AnimationManager; // 声明一个全局的动画管理器
+AnimationManager_t Menu_AnimationManager;
+AnimationManager_t Cursor_AnimationManager;
+AnimationManager_t g_AnimationManager; // 全局动画管理器
 
 void OLED_InitAnimationManager(AnimationManager_t *manager) // 这是初始化一个动画管理器，填入你的manager名字，在系统初始化时候调用它
 {
@@ -519,7 +520,7 @@ void OLED_MoveObjectAxis(AnimationManager_t *manager, const char *tag,
 }
 
 // 这个函数是用来移动一个对象的，tag是对象的标签，targetX是目标坐标，duration是动画持续时间，easeType是缓动类型
-//!这里不可以在while里面调用！为一次性调用
+//! 这里不可以在while里面调用！为一次性调用
 void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float targetX, uint32_t duration, EaseType_t easeType)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
@@ -530,7 +531,7 @@ void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float tar
 }
 
 // 这个函数是用来移动一个对象的，tag是对象的标签，targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
-//!这里不可以在while里面调用！为一次性调用
+//! 这里不可以在while里面调用！为一次性调用
 void OLED_DoTweenObjectY(AnimationManager_t *manager, const char *tag, float targetY, uint32_t duration, EaseType_t easeType)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
@@ -543,28 +544,6 @@ void OLED_DoTweenObjectY(AnimationManager_t *manager, const char *tag, float tar
 #pragma endregion ANIMATIONTWEENS
 
 #pragma region OLED_EPICFUL_UI
-
-// UI 常量定义
-#define UI_MAX_PAGES 5      // 最大页面数
-#define UI_TITLE_HEIGHT 1   // 标题栏高度(页)
-#define UI_STATUS_HEIGHT 1  // 状态栏高度(页)
-#define UI_CONTENT_HEIGHT 6 // 内容区域高度(页)
-
-// UI 状态与变量
-typedef enum
-{
-    UI_PAGE_MAIN = 0, // 主页面
-    UI_PAGE_STATUS,   // 状态页面
-    UI_PAGE_SETTINGS, // 设置页面
-    UI_PAGE_GRAPH,    // 图表页面
-    UI_PAGE_ABOUT     // 关于页面
-} UI_Page_t;
-
-UI_Page_t currentPage = UI_PAGE_MAIN; // 当前显示的页面
-uint8_t menuSelection = 0;            // 菜单选择项
-uint8_t menuItemCount = 4;            // 菜单项数量
-uint8_t settingsSelection = 0;        // 设置页面选择项
-uint8_t dataIndex = 0;                // 数据索引
 
 // 绘制UI标题栏
 void OLED_DrawTitleBar(char *title) // 确保标题长度不超过22个字符 //! UPDATEDISPLAY REQUIRED
@@ -617,52 +596,166 @@ void OLED_DrawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t progress)
 }
 
 // 绘制空心矩形
-void OLED_DrawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height) //! UPDATEDISPLAY REQUIRED
+// Parameters x and y are changed to int16_t to handle negative coordinates.
+void OLED_DrawRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height) //! UPDATEDISPLAY REQUIRED
 {
-    // 基础边界检查和裁剪
-    if (x >= OLED_WIDTH || y >= OLED_HEIGHT || width == 0 || height == 0)
-        return;
-    if (x + width > OLED_WIDTH)
-        width = OLED_WIDTH - x;
-    if (y + height > OLED_HEIGHT)
-        height = OLED_HEIGHT - y;
-
-    uint8_t x2 = x + width - 1;
-    uint8_t y2 = y + height - 1;
-
-    // 绘制水平线
-    for (uint8_t i = x; i <= x2; i++)
+    // Initial check for zero dimensions
+    if (width == 0 || height == 0)
     {
-        OLED_WritePixel(i, y, 1);  // 顶线
-        OLED_WritePixel(i, y2, 1); // 底线
+        return;
     }
 
-    // 绘制垂直线
-    for (uint8_t j = y + 1; j < y2; j++)
+    // Use int16_t for width and height internally for clipping calculations
+    // to prevent overflow and handle adjustments correctly.
+    int16_t current_width = width;
+    int16_t current_height = height;
+
+    // Clip left edge: if x is negative, adjust width and set x to 0
+    if (x < 0)
     {
-        OLED_WritePixel(x, j, 1);  // 左线
-        OLED_WritePixel(x2, j, 1); // 右线
+        current_width += x; // x is negative, so this reduces width
+        x = 0;
+    }
+
+    // Clip top edge: if y is negative, adjust height and set y to 0
+    if (y < 0)
+    {
+        current_height += y; // y is negative, so this reduces height
+        y = 0;
+    }
+
+    // If width or height became non-positive after left/top clipping, nothing to draw
+    if (current_width <= 0 || current_height <= 0)
+    {
+        return;
+    }
+
+    // Check if the adjusted rectangle is entirely off-screen to the right or bottom
+    // At this point, x and y are >= 0.
+    // Assuming OLED_WIDTH and OLED_HEIGHT are defined (e.g., in oled.h)
+    if (x >= OLED_WIDTH || y >= OLED_HEIGHT)
+    {
+        return;
+    }
+
+    // Clip right edge: if x + current_width extends beyond OLED_WIDTH
+    if (x + current_width > OLED_WIDTH)
+    {
+        current_width = OLED_WIDTH - x;
+    }
+
+    // Clip bottom edge: if y + current_height extends beyond OLED_HEIGHT
+    if (y + current_height > OLED_HEIGHT)
+    {
+        current_height = OLED_HEIGHT - y;
+    }
+
+    // If width or height became non-positive after right/bottom clipping, nothing to draw
+    if (current_width <= 0 || current_height <= 0)
+    {
+        return;
+    }
+
+    // At this point, x, y, current_width, and current_height define the drawable part
+    // of the rectangle. Cast coordinates and dimensions to uint8_t for drawing,
+    // as they are now confirmed to be within valid screen bounds.
+    uint8_t final_x = (uint8_t)x;
+    uint8_t final_y = (uint8_t)y;
+    uint8_t final_width = (uint8_t)current_width;
+    uint8_t final_height = (uint8_t)current_height;
+
+    // Calculate the bottom-right corner coordinates
+    uint8_t x2 = final_x + final_width - 1;
+    uint8_t y2 = final_y + final_height - 1;
+
+    // Draw horizontal lines
+    for (uint8_t i = final_x; i <= x2; i++)
+    {
+        OLED_WritePixel(i, final_y, 1); // Top line
+        OLED_WritePixel(i, y2, 1);      // Bottom line
+    }
+
+    // Draw vertical lines
+    // Loop from final_y + 1 to y2 - 1 to avoid double-drawing corners
+    // and to correctly handle height = 1 or 2.
+    for (uint8_t j = final_y + 1; j < y2; j++)
+    {
+        OLED_WritePixel(final_x, j, 1); // Left line
+        OLED_WritePixel(x2, j, 1);      // Right line
     }
 }
 
 // 绘制填充矩形
-void OLED_DrawFilledRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color) //! UPDATEDISPLAY REQUIRED
+void OLED_DrawFilledRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height, uint8_t color) //! UPDATEDISPLAY REQUIRED
 {
-    // 边界检查和裁剪
-    if (x >= OLED_WIDTH || y >= OLED_HEIGHT || width == 0 || height == 0)
+    // Initial check for zero dimensions
+    if (width == 0 || height == 0)
+    {
         return;
-    if (x + width > OLED_WIDTH)
-        width = OLED_WIDTH - x;
-    if (y + height > OLED_HEIGHT)
-        height = OLED_HEIGHT - y;
+    }
 
-    uint8_t x2 = x + width - 1;
-    uint8_t y2 = y + height - 1;
+    // Use int16_t for width and height internally for clipping calculations
+    int16_t current_width = width;
+    int16_t current_height = height;
+
+    // Clip left edge: if x is negative, adjust width and set x to 0
+    if (x < 0)
+    {
+        current_width += x; // x is negative, so this reduces width
+        x = 0;
+    }
+
+    // Clip top edge: if y is negative, adjust height and set y to 0
+    if (y < 0)
+    {
+        current_height += y; // y is negative, so this reduces height
+        y = 0;
+    }
+
+    // If width or height became non-positive after left/top clipping, nothing to draw
+    if (current_width <= 0 || current_height <= 0)
+    {
+        return;
+    }
+
+    // Check if the adjusted rectangle is entirely off-screen to the right or bottom
+    // At this point, x and y are >= 0.
+    if (x >= OLED_WIDTH || y >= OLED_HEIGHT)
+    {
+        return;
+    }
+
+    // Clip right edge: if x + current_width extends beyond OLED_WIDTH
+    if (x + current_width > OLED_WIDTH)
+    {
+        current_width = OLED_WIDTH - x;
+    }
+
+    // Clip bottom edge: if y + current_height extends beyond OLED_HEIGHT
+    if (y + current_height > OLED_HEIGHT)
+    {
+        current_height = OLED_HEIGHT - y;
+    }
+
+    // If width or height became non-positive after right/bottom clipping, nothing to draw
+    if (current_width <= 0 || current_height <= 0)
+    {
+        return;
+    }
+
+    // Cast coordinates and dimensions to uint8_t for drawing
+    uint8_t final_x = (uint8_t)x;
+    uint8_t final_y = (uint8_t)y;
+    uint8_t final_width = (uint8_t)current_width;
+    uint8_t final_height = (uint8_t)current_height;
+
+    uint8_t x2 = final_x + final_width - 1;
+    uint8_t y2 = final_y + final_height - 1;
 
     // 逐像素填充
-    for (uint8_t j = y; j <= y2; j++)
+    for (uint8_t j = final_y; j <= y2; j++)
     {
-        for (uint8_t i = x; i <= x2; i++)
+        for (uint8_t i = final_x; i <= x2; i++)
         {
             OLED_WritePixel(i, j, color);
         }
