@@ -12,6 +12,7 @@
         "oled_ui.h": "c",
         "STDIO.H": "cpp",
         "MATH.H": "cpp",
-        "STRING.H": "cpp"
+        "STRING.H": "cpp",
+        "winapifamily.h": "c"
     }
 }

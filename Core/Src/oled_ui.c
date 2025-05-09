@@ -519,7 +519,7 @@ void OLED_MoveObjectAxis(AnimationManager_t *manager, const char *tag,
 }
 
 // 这个函数是用来移动一个对象的，tag是对象的标签，targetX是目标坐标，duration是动画持续时间，easeType是缓动类型
-//!这里不可以在while里面调用！为一次性调用，不需要OLED_UpdateAnimationManager
+//!这里不可以在while里面调用！为一次性调用
 void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float targetX, uint32_t duration, EaseType_t easeType)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
@@ -530,7 +530,7 @@ void OLED_DoTweenObjectX(AnimationManager_t *manager, const char *tag, float tar
 }
 
 // 这个函数是用来移动一个对象的，tag是对象的标签，targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
-//!这里不可以在while里面调用！为一次性调用，不需要OLED_UpdateAnimationManager
+//!这里不可以在while里面调用！为一次性调用
 void OLED_DoTweenObjectY(AnimationManager_t *manager, const char *tag, float targetY, uint32_t duration, EaseType_t easeType)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);

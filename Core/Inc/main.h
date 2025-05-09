@@ -57,6 +57,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define GYRO_SCL_Pin GPIO_PIN_10
+#define GYRO_SCL_GPIO_Port GPIOB
+#define GYRO_SDA_Pin GPIO_PIN_11
+#define GYRO_SDA_GPIO_Port GPIOB
+#define Encoder_CH1_Pin GPIO_PIN_4
+#define Encoder_CH1_GPIO_Port GPIOB
+#define Encoder_CH2_Pin GPIO_PIN_5
+#define Encoder_CH2_GPIO_Port GPIOB
+#define OLED_SCL_Pin GPIO_PIN_6
+#define OLED_SCL_GPIO_Port GPIOB
+#define OLED_SDA_Pin GPIO_PIN_7
+#define OLED_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

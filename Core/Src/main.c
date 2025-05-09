@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "gpio.h"
 
@@ -58,7 +59,8 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int count = 0; // 计数器
+float x, y;//这个是为了获取动画坐标初始值的中间变量
 /* USER CODE END 0 */
 
 /**
@@ -69,7 +71,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  float x, y;//这个是为了获取动画坐标初始值的中间变量
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -92,22 +94,24 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_TIM1_Init();
+  MX_I2C2_Init();
+  MX_SPI2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
 
+  // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // 启动PWM
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
   // InitBlockAnimation(); // 初始化方块动画
   // AnimationLoop(); // 执行动画循环
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_MoveObject(&g_AnimationManager, "player", 0, 0, 0, 0, 1, EASE_OUT_BOUNCE); // 这里可以是初始化
   OLED_MoveObject(&g_AnimationManager, "player1", 128, 64, 100, 30, 1, EASE_IN_BOUNCE); // 这里可以是初始化
-
-  OLED_DoTweenObjectX(&g_AnimationManager, "player1", 0, 3000, EASE_IN_BOUNCE); // 移动对象
-  OLED_DoTweenObjectY(&g_AnimationManager, "player1", 0, 3000, EASE_IN_CUBIC); // 移动对象
   /* USER CODE END 2 */
-  
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -115,9 +119,8 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    OLED_DoTweenObject(&g_AnimationManager, "player", 128, 64, 4000, EASE_IN_BOUNCE, 1);
+    OLED_DoTweenObject(&g_AnimationManager, "player", 128, 64, 4000, EASE_INOUT_BOUNCE, true);
 
-    
     if (OLED_GetObjectPosition(&g_AnimationManager, "player", &x, &y))
     {
         OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
@@ -128,18 +131,14 @@ int main(void)
         OLED_DrawRectangle((uint8_t)x, (uint8_t)y, 20, 20);
     }
 
-    // if (!OLED_GetAnimationStates(&g_AnimationManager, "player1")) // 检查动画是否活跃
-    // {
-    //     OLED_GetObjectPosition(&g_AnimationManager, "player1", &x, &y); // 获取当前坐标
-    //     OLED_MoveObject(&g_AnimationManager, "player1", x, y, 10, 20, 1000, EASE_OUT_BOUNCE); // 移动对象
-    // }
-
-    // OLED_InvertArea(64, 16, 64, 48); //
+    OLED_InvertArea(64, 16, 64, 48); //
 
 
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
     OLED_UpdateDisplayVSync(); // 更新显示
     #pragma endregion OLED_UI_SETTINGS
+
+
     //  // HAL_Delay(1000); // 延时1秒
     //  // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // 点亮LED
     //  // HAL_Delay(1000); // 延时1秒
@@ -163,12 +162,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
