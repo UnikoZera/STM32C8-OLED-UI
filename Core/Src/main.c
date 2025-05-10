@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
@@ -28,6 +29,8 @@
 #include "oled.h"
 #include "oled_ui.h"
 #include "oled_driver.h"
+// #include "oled_benchmark.h"
+#include "oled_optimize.h"
 #include "pid.h"
 /* USER CODE END Includes */
 
@@ -93,6 +96,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_TIM1_Init();
   MX_I2C2_Init();
@@ -102,7 +106,15 @@ int main(void)
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
+  
+  // 运行性能基准测试，持续3秒
+  // OLED_RunBenchmark(3000);
+  // HAL_Delay(3000); // 显示结果3秒
+  
+  OLED_EnableDiffMode(1);  // 启用差分更新
+  OLED_EnableFastUpdate(1); // 启用快速更新
 
+  
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
@@ -121,8 +133,9 @@ int main(void)
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
     OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
-    OLED_DisplayFPS(); // 显示FPS
-    OLED_UpdateDisplayVSync(); // 更新显示
+    OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
+    OLED_SmartUpdate(); // 智能更新显示
+    // OLED_HighPerformanceUpdate(); // 超高性能更新
     #pragma endregion OLED_UI_SETTINGS
 
 

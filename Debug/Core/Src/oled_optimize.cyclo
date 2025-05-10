@@ -1,0 +1,7 @@
+../Core/Src/oled_optimize.c:20:6:HAL_I2C_MasterTxCpltCallback	2
+../Core/Src/oled_optimize.c:30:6:OLED_EnableDiffMode	2
+../Core/Src/oled_optimize.c:40:6:OLED_EnableFastUpdate	1
+../Core/Src/oled_optimize.c:47:6:OLED_SmartUpdate	16
+../Core/Src/oled_optimize.c:123:6:OLED_DiffUpdateDMA	11
+../Core/Src/oled_optimize.c:205:6:OLED_OptimizedDisplayFPS	2
+../Core/Src/oled_optimize.c:228:6:OLED_HighPerformanceUpdate	5

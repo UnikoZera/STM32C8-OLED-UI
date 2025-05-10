@@ -1,0 +1,4 @@
+../Core/Src/oled_benchmark.c:28:6:OLED_SetPerfMode	16	static
+../Core/Src/oled_benchmark.c:68:6:OLED_UpdateByMode	8	static
+../Core/Src/oled_benchmark.c:98:6:OLED_RunBenchmark	144	static
+../Core/Src/oled_benchmark.c:172:16:OLED_GetBestPerfMode	24	static
