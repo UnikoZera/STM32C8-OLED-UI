@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  0000a070  2**0
                   CONTENTS, READONLY
- 12 .debug_info   000105cb  00000000  00000000  0000a099  2**0
+ 12 .debug_info   00010454  00000000  00000000  0000a099  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00002ee9  00000000  00000000  0001a664  2**0
+ 13 .debug_abbrev 00002e9e  00000000  00000000  0001a4ed  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000011e0  00000000  00000000  0001d550  2**3
+ 14 .debug_aranges 000011d0  00000000  00000000  0001d390  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00000e1f  00000000  00000000  0001e730  2**0
+ 15 .debug_rnglists 00000e12  00000000  00000000  0001e560  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00019bdd  00000000  00000000  0001f54f  2**0
+ 16 .debug_macro  00019bdd  00000000  00000000  0001f372  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001624c  00000000  00000000  0003912c  2**0
+ 17 .debug_line   00016146  00000000  00000000  00038f4f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008dd95  00000000  00000000  0004f378  2**0
+ 18 .debug_str    0008dd24  00000000  00000000  0004f095  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000dd10d  2**0
+ 19 .comment      00000043  00000000  00000000  000dcdb9  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000054f0  00000000  00000000  000dd150  2**2
+ 20 .debug_frame  000054ac  00000000  00000000  000dcdfc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000004b  00000000  00000000  000e2640  2**0
+ 21 .debug_line_str 0000004b  00000000  00000000  000e22a8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1198,10 +1198,6 @@ int main(void)
  8000acc:	f000 f87e 	bl	8000bcc <OLED_InitBuffer>
   OLED_ClearBuffer(); // 清空缓冲区
  8000ad0:	f000 f8b0 	bl	8000c34 <OLED_ClearBuffer>
-  
-  // 运行性能基准测试，持续3秒
-  // OLED_RunBenchmark(3000);
-  // HAL_Delay(3000); // 显示结果3秒
   
   OLED_EnableDiffMode(1);  // 启用差分更新
  8000ad4:	2001      	movs	r0, #1
@@ -3964,8 +3960,7 @@ void OLED_SmartUpdate(void)
  8001d80:	20000002 	.word	0x20000002
 
 08001d84 <OLED_OptimizedDisplayFPS>:
-    HAL_I2C_Master_Transmit_DMA(&hi2c1, OLED_ADDR << 1, diff_buffer, diff_count + 1);
-}
+
 
 // 显示FPS
 void OLED_OptimizedDisplayFPS(int16_t x, int16_t y)
@@ -4030,7 +4025,6 @@ void OLED_OptimizedDisplayFPS(int16_t x, int16_t y)
  8001ddc:	4a07      	ldr	r2, [pc, #28]	@ (8001dfc <OLED_OptimizedDisplayFPS+0x78>)
  8001dde:	4618      	mov	r0, r3
  8001de0:	f7ff fb64 	bl	80014ac <OLED_DisplayString>
-}
  8001de4:	bf00      	nop
  8001de6:	3710      	adds	r7, #16
  8001de8:	46bd      	mov	sp, r7

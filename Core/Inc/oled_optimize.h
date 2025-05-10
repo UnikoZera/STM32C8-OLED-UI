@@ -20,10 +20,4 @@ void OLED_OptimizedDisplayFPS(int16_t x, int16_t y);
 void OLED_EnableDiffMode(uint8_t enable);
 void OLED_EnableFastUpdate(uint8_t enable);
 
-// 差分DMA更新
-void OLED_DiffUpdateDMA(void);
-
-// 超高性能显示更新
-void OLED_HighPerformanceUpdate(void);
-
 #endif /* INC_OLED_OPTIMIZE_H_ */

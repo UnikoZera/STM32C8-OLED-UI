@@ -13,7 +13,7 @@ extern const uint8_t cmds[];
 
 // 上一帧的缓存，用于差分更新
 static uint8_t OLED_PrevBuffer[128 * 8];
-static uint8_t diff_mode_enabled = 0;
+static uint8_t diff_mode_enabled = 0; // 差分更新模式启用标志
 static uint8_t fast_update_enabled = 1; // 默认启用快速更新
 
 // I2C DMA传输完成回调函数
@@ -119,87 +119,6 @@ void OLED_SmartUpdate(void)
     }
 }
 
-// 差分DMA更新 - 只更新有变化的数据
-void OLED_DiffUpdateDMA(void)
-{
-    if (oled_dma_busy || !diff_mode_enabled)
-    {
-        return;
-    }
-
-    static uint8_t diff_buffer[OLED_WIDTH * OLED_PAGES + 1];
-    static uint8_t cmd_buffer[10]; // 用于发送命令的缓冲区
-    uint16_t diff_count = 0;
-    uint8_t has_diff = 0;
-    uint8_t first_diff_page = 255;
-    uint8_t last_diff_page = 0;
-
-    // 找出差异并构建差异缓冲区
-    for (uint8_t page = 0; page < OLED_PAGES; page++)
-    {
-        uint16_t start_idx = page * OLED_WIDTH;
-        uint8_t page_changed = 0;
-
-        for (uint16_t i = 0; i < OLED_WIDTH; i++)
-        {
-            if (OLED_BackBuffer[start_idx + i] != OLED_PrevBuffer[start_idx + i])
-            {
-                page_changed = 1;
-                has_diff = 1;
-                break;
-            }
-        }
-
-        if (page_changed)
-        {
-            if (page < first_diff_page)
-                first_diff_page = page;
-            if (page > last_diff_page)
-                last_diff_page = page;
-
-            // 复制整页数据到差异缓冲区
-            memcpy(
-                diff_buffer + 1 + diff_count,
-                OLED_BackBuffer + start_idx,
-                OLED_WIDTH);
-            diff_count += OLED_WIDTH;
-
-            // 更新上一帧缓存
-            memcpy(
-                OLED_PrevBuffer + start_idx,
-                OLED_BackBuffer + start_idx,
-                OLED_WIDTH);
-        }
-    }
-
-    // 如果没有差异，不需要更新
-    if (!has_diff || first_diff_page > last_diff_page)
-    {
-        return;
-    }
-
-    diff_buffer[0] = 0x40; // 数据控制字节：Co=0, D/C#=1 (数据)
-
-    // 标记DMA传输忙
-    oled_dma_busy = OLED_BUSY;
-
-    // 设置页地址范围
-    cmd_buffer[0] = 0x00; // 控制字节：Co=0, D/C#=0 (命令)
-    cmd_buffer[1] = 0x22; // 页地址设置命令
-    cmd_buffer[2] = first_diff_page;
-    cmd_buffer[3] = last_diff_page;
-    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, cmd_buffer, 4, HAL_MAX_DELAY);
-
-    // 设置列地址范围
-    cmd_buffer[0] = 0x00;
-    cmd_buffer[1] = 0x21;
-    cmd_buffer[2] = 0x00; // 起始列
-    cmd_buffer[3] = 0x7F; // 结束列 (127)
-    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, cmd_buffer, 4, HAL_MAX_DELAY);
-
-    // 使用DMA传输差异数据
-    HAL_I2C_Master_Transmit_DMA(&hi2c1, OLED_ADDR << 1, diff_buffer, diff_count + 1);
-}
 
 // 显示FPS
 void OLED_OptimizedDisplayFPS(int16_t x, int16_t y)
@@ -222,24 +141,4 @@ void OLED_OptimizedDisplayFPS(int16_t x, int16_t y)
     }
 
     OLED_DisplayString(x, y, fps_str);
-}
-
-// 超高性能显示函数 - 使用DMA和差分更新
-void OLED_HighPerformanceUpdate(void)
-{
-    // 如果DMA可用且启用了差分模式，则使用差分DMA更新
-    if (!oled_dma_busy && diff_mode_enabled)
-    {
-        OLED_DiffUpdateDMA();
-    }
-    // 否则，如果快速更新功能可用，则使用智能更新
-    else if (fast_update_enabled)
-    {
-        OLED_SmartUpdate();
-    }
-    // 最后，回退到标准DMA更新
-    else if (!oled_dma_busy)
-    {
-        OLED_UpdateDisplayDMA();
-    }
 }

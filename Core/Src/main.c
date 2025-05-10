@@ -107,10 +107,6 @@ int main(void)
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
   
-  // 运行性能基准测试，持续3秒
-  // OLED_RunBenchmark(3000);
-  // HAL_Delay(3000); // 显示结果3秒
-  
   OLED_EnableDiffMode(1);  // 启用差分更新
   OLED_EnableFastUpdate(1); // 启用快速更新
 
@@ -135,7 +131,6 @@ int main(void)
     OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     OLED_SmartUpdate(); // 智能更新显示
-    // OLED_HighPerformanceUpdate(); // 超高性能更新
     #pragma endregion OLED_UI_SETTINGS
 
 
