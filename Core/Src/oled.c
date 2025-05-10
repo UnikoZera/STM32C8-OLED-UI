@@ -110,11 +110,11 @@ const uint8_t OLED_FONT_6x8[] = {
     0x44, 0x64, 0x54, 0x4C, 0x44, 0x00  // z (122)
 };
 
-uint8_t cmds[] = 
-{
-    0x20, 0x00,       // 水平寻址模式
-    0x21, 0x00, 0x7F, // 列地址范围: 0-127
-    0x22, 0x00, 0x07  // 页地址范围: 0-7
+uint8_t cmds[] =
+    {
+        0x20, 0x00,       // 水平寻址模式
+        0x21, 0x00, 0x7F, // 列地址范围: 0-127
+        0x22, 0x00, 0x07  // 页地址范围: 0-7
 };
 
 // 初始化缓冲区
@@ -170,10 +170,10 @@ void OLED_UpdateDisplayVSync(void)
     HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, 1025, HAL_MAX_DELAY);
 }
 
-void OLED_WritePixel(uint8_t x, uint8_t y, uint8_t color)
+void OLED_WritePixel(int16_t x, int16_t y, uint8_t color)
 {
     // 边界检查
-    if (x >= 128 || y >= 64)
+    if (x >= 128 || x < 0 || y >= 64 || y < 0) // 添加负坐标检查
         return;
 
     // 计算像素所在的字节位置
@@ -251,188 +251,212 @@ void OLED_Init()
 }
 
 // 区域反色功能 - 将指定矩形区域内的像素颜色反转 //! UPDATEDISPLAY REQUIRED
-void OLED_InvertArea(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
+void OLED_InvertArea(int16_t x, int16_t y, uint8_t width, uint8_t height)
 {
-    // 边界检查和裁剪
-    if (x >= OLED_WIDTH || y >= OLED_HEIGHT || width == 0 || height == 0)
+    if (width == 0 || height == 0)
         return;
-    if (x + width > OLED_WIDTH)
-        width = OLED_WIDTH - x;
-    if (y + height > OLED_HEIGHT)
-        height = OLED_HEIGHT - y;
 
-    uint8_t end_x = x + width - 1;
-    uint8_t end_y = y + height - 1;
+    int16_t x_start_on_screen = x;
+    int16_t y_start_on_screen = y;
+    int16_t x_end_on_screen = x + width - 1;
+    int16_t y_end_on_screen = y + height - 1;
 
-    // 遍历区域内的每个像素并反转
-    for (uint8_t j = y; j <= end_y; j++)
+    // Clip to screen boundaries
+    if (x_start_on_screen < 0)
+        x_start_on_screen = 0;
+    if (y_start_on_screen < 0)
+        y_start_on_screen = 0;
+    if (x_end_on_screen >= OLED_WIDTH)
+        x_end_on_screen = OLED_WIDTH - 1;
+    if (y_end_on_screen >= OLED_HEIGHT)
+        y_end_on_screen = OLED_HEIGHT - 1;
+
+    // If clipped area is invalid (e.g., entirely off-screen after clipping)
+    if (x_start_on_screen > x_end_on_screen || y_start_on_screen > y_end_on_screen)
+        return;
+
+    for (int16_t j = y_start_on_screen; j <= y_end_on_screen; j++)
     {
-        for (uint8_t i = x; i <= end_x; i++)
+        for (int16_t i = x_start_on_screen; i <= x_end_on_screen; i++)
         {
             // 计算当前像素在缓冲区中的位置
-            uint16_t byte_index = i + (j / 8) * OLED_WIDTH;
-            uint8_t bit_position = j % 8;
+            // i and j are guaranteed to be within screen bounds here
+            uint16_t byte_index = (uint16_t)i + ((uint16_t)j / 8) * OLED_WIDTH;
+            uint8_t bit_position = (uint8_t)j % 8;
 
-            // 反转该像素（将0变为1，1变为0）
-            OLED_BackBuffer[byte_index] ^= (1 << bit_position);
+            // Check buffer bounds just in case, though clipping should prevent out-of-bounds.
+            if (byte_index < sizeof(OLED_BackBuffer))
+            {
+                OLED_BackBuffer[byte_index] ^= (1 << bit_position);
+            }
         }
     }
 }
 
-void OLED_SetCursor(uint8_t x, uint8_t y)
+void OLED_SetCursor(int16_t x, int16_t y)
 {
     OLED_SendCommand(0xB0 + y);                 // 设置页地址 (0-7)
     OLED_SendCommand(0x00 + (x & 0x0F));        // 设置低4位列地址
     OLED_SendCommand(0x10 + ((x >> 4) & 0x0F)); // 设置高4位列地址
 }
 
-void OLED_DisplayChar(uint8_t x, uint8_t y, char ch) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayChar(int16_t x, int16_t y, char ch) //! UPDATEDISPLAY REQUIRED
 {
-    // 边界检查
-    if (x >= OLED_WIDTH || y >= OLED_HEIGHT || ch < 32)
+    const uint8_t font_width = 6;
+    const uint8_t font_height = 8;
+
+    if (ch < 32)
         return;
 
-    uint8_t c = ch - 32;    // 获取字体数组中的索引
-    uint8_t font_width = 6; // 6x8字体宽度
+    uint8_t c = ch - 32;
 
-    // 防止越界
-    if (x + font_width > OLED_WIDTH)
+    for (uint8_t char_col = 0; char_col < font_width; char_col++)
     {
-        font_width = OLED_WIDTH - x;
-    }
+        int16_t screen_x = x + char_col;
+        if (screen_x < 0 || screen_x >= OLED_WIDTH)
+            continue;
 
-    // 获取字符所在页
-    uint8_t page = y / 8;
-    uint8_t bit_offset = y % 8;
+        if ((c * font_width + char_col) >= sizeof(OLED_FONT_6x8))
+            break;
+        uint8_t font_data_col = OLED_FONT_6x8[c * font_width + char_col];
 
-    // 将字体数据写入缓冲区
-    for (uint8_t i = 0; i < font_width; i++)
-    {
-        if ((c * 6 + i) >= sizeof(OLED_FONT_6x8))
-            break; // 安全检查
-
-        uint8_t font_data = OLED_FONT_6x8[c * 6 + i];
-
-        // 如果字符跨页，需要分别处理上下两页
-        uint16_t buffer_index = x + i + (page * OLED_WIDTH);
-
-        if (bit_offset == 0)
+        for (uint8_t char_row_bit = 0; char_row_bit < font_height; char_row_bit++)
         {
-            // 字符刚好在页的起始位置，直接写入
-            OLED_BackBuffer[buffer_index] = font_data;
-        }
-        else
-        {
-            // 字符跨页，分别处理上下两页
-            // 当前页
-            OLED_BackBuffer[buffer_index] |= font_data << bit_offset;
+            int16_t screen_y = y + char_row_bit;
+            if (screen_y < 0 || screen_y >= OLED_HEIGHT)
+                continue;
 
-            // 下一页（如果有）
-            if (page < OLED_PAGES - 1)
+            if ((font_data_col >> char_row_bit) & 0x01)
             {
-                OLED_BackBuffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
+                uint8_t page = (uint8_t)screen_y / 8;
+                uint8_t bit_offset_in_page = (uint8_t)screen_y % 8;
+                uint16_t buffer_index = (uint16_t)screen_x + page * OLED_WIDTH;
+
+                if (buffer_index < sizeof(OLED_BackBuffer))
+                {
+                    OLED_BackBuffer[buffer_index] |= (1 << bit_offset_in_page);
+                }
             }
         }
     }
 }
 
-void OLED_DisplayCharInverted(uint8_t x, uint8_t y, char ch, uint8_t inverted) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayCharInverted(int16_t x, int16_t y, char ch, uint8_t inverted) //! UPDATEDISPLAY REQUIRED
 {
-    // 边界检查
-    if (x >= OLED_WIDTH || y >= OLED_HEIGHT || ch < 32)
+    const uint8_t font_width = 6;
+    const uint8_t font_height = 8;
+
+    if (ch < 32)
         return;
 
-    uint8_t c = ch - 32;    // 获取字体数组中的索引
-    uint8_t font_width = 6; // 6x8字体宽度
+    uint8_t c = ch - 32;
 
-    // 防止越界
-    if (x + font_width > OLED_WIDTH)
+    for (uint8_t char_col = 0; char_col < font_width; char_col++)
     {
-        font_width = OLED_WIDTH - x;
-    }
+        int16_t screen_x = x + char_col;
+        if (screen_x < 0 || screen_x >= OLED_WIDTH)
+            continue;
 
-    // 获取字符所在页
-    uint8_t page = y / 8;
-    uint8_t bit_offset = y % 8;
+        if ((c * font_width + char_col) >= sizeof(OLED_FONT_6x8))
+            break;
+        uint8_t font_data_col = OLED_FONT_6x8[c * font_width + char_col];
 
-    // 将字体数据写入缓冲区
-    for (uint8_t i = 0; i < font_width; i++)
-    {
-        if ((c * 6 + i) >= sizeof(OLED_FONT_6x8))
-            break; // 安全检查
-
-        uint8_t font_data = OLED_FONT_6x8[c * 6 + i];
-        // 如果需要反色显示，对字体数据取反
         if (inverted)
         {
-            font_data = ~font_data;
+            font_data_col = ~font_data_col;
         }
 
-        // 如果字符跨页，需要分别处理上下两页
-        uint16_t buffer_index = x + i + (page * OLED_WIDTH);
-
-        if (bit_offset == 0)
+        for (uint8_t char_row_bit = 0; char_row_bit < font_height; char_row_bit++)
         {
-            // 字符刚好在页的起始位置，直接写入
-            OLED_BackBuffer[buffer_index] = font_data;
-        }
-        else
-        {
-            // 字符跨页，分别处理上下两页
-            // 当前页 - 先清除当前位置，再写入
-            OLED_BackBuffer[buffer_index] &= ~(0xFF << bit_offset);
-            OLED_BackBuffer[buffer_index] |= font_data << bit_offset;
+            int16_t screen_y = y + char_row_bit;
+            if (screen_y < 0 || screen_y >= OLED_HEIGHT)
+                continue;
 
-            // 下一页（如果有） - 先清除当前位置，再写入
-            if (page < OLED_PAGES - 1)
+            uint8_t page = (uint8_t)screen_y / 8;
+            uint8_t bit_offset_in_page = (uint8_t)screen_y % 8;
+            uint16_t buffer_index = (uint16_t)screen_x + page * OLED_WIDTH;
+
+            if (buffer_index < sizeof(OLED_BackBuffer))
             {
-                OLED_BackBuffer[buffer_index + OLED_WIDTH] &= ~(0xFF >> (8 - bit_offset));
-                OLED_BackBuffer[buffer_index + OLED_WIDTH] |= font_data >> (8 - bit_offset);
+                if ((font_data_col >> char_row_bit) & 0x01)
+                {
+                    OLED_BackBuffer[buffer_index] |= (1 << bit_offset_in_page);
+                }
+                else
+                {
+                    OLED_BackBuffer[buffer_index] &= ~(1 << bit_offset_in_page);
+                }
             }
         }
     }
 }
 
-void OLED_DisplayString(uint8_t x, uint8_t y, char *str) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayString(int16_t x, int16_t y, char *str) //! UPDATEDISPLAY REQUIRED
 {
     uint8_t j = 0;
-    uint8_t font_width = 6; // 6x8字体宽度
+    const uint8_t font_width = 6;
+    const uint8_t font_height = 8;
 
+    if (y >= OLED_HEIGHT || (y + font_height - 1) < 0)
+    {
+        return;
+    }
+
+    int16_t current_char_x;
     while (str[j] != '\0')
     {
-        uint8_t current_x = x + (j * font_width);
-        // 如果字符起始位置超出屏幕，则停止
-        if (current_x >= OLED_WIDTH)
+        current_char_x = x + (j * font_width);
+        if (current_char_x >= OLED_WIDTH)
+        {
             break;
-        OLED_DisplayChar(current_x, y, str[j]);
+        }
+        if ((current_char_x + font_width - 1) < 0)
+        {
+            j++;
+            continue;
+        }
+        OLED_DisplayChar(current_char_x, y, str[j]);
         j++;
     }
 }
 
-void OLED_DisplayStringInverted(uint8_t x, uint8_t y, char *str, uint8_t inverted) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayStringInverted(int16_t x, int16_t y, char *str, uint8_t inverted) //! UPDATEDISPLAY REQUIRED
 {
     uint8_t j = 0;
-    uint8_t font_width = 6; // 6x8字体宽度
+    const uint8_t font_width = 6;
+    const uint8_t font_height = 8;
 
+    if (y >= OLED_HEIGHT || (y + font_height - 1) < 0)
+    {
+        return;
+    }
+
+    int16_t current_char_x;
     while (str[j] != '\0')
     {
-        uint8_t current_x = x + (j * font_width);
-        // 如果字符起始位置超出屏幕，则停止
-        if (current_x >= OLED_WIDTH)
+        current_char_x = x + (j * font_width);
+        if (current_char_x >= OLED_WIDTH)
+        {
             break;
-        OLED_DisplayCharInverted(current_x, y, str[j], inverted);
+        }
+        if ((current_char_x + font_width - 1) < 0)
+        {
+            j++;
+            continue;
+        }
+        OLED_DisplayCharInverted(current_char_x, y, str[j], inverted);
         j++;
     }
 }
 
-void OLED_DisplayInteger(uint8_t x, uint8_t y, int number) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayInteger(int16_t x, int16_t y, int number) //! UPDATEDISPLAY REQUIRED
 {
     char str[12];
     sprintf(str, "%d", number);
     OLED_DisplayString(x, y, str);
 }
 
-void OLED_DisplayFloat(uint8_t x, uint8_t y, float number) //! UPDATEDISPLAY REQUIRED
+void OLED_DisplayFloat(int16_t x, int16_t y, float number) //! UPDATEDISPLAY REQUIRED
 {
     char str[32];
     int intPart = (int)number;

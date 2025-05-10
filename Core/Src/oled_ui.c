@@ -5,6 +5,8 @@
  *      Author: UnikoZera
  */
 
+#include "main.h"   // Include main.h for HAL types like uint32_t
+#include "stdint.h" // 添加 stdint.h 以支持标准整数类型
 #include "oled_ui.h"
 #pragma region TWEENS // 动画缓动函数全部在这里定义
 
@@ -558,7 +560,7 @@ void OLED_DrawTitleBar(char *title) // 确保标题长度不超过22个字符 //
 }
 
 // 绘制电池图标
-void OLED_DrawBattery(uint8_t x, uint8_t y, uint8_t percentage) //! UPDATEDISPLAY REQUIRED
+void OLED_DrawBattery(int16_t x, int16_t y, uint8_t percentage) //! UPDATEDISPLAY REQUIRED
 {
     // 绘制电池外框
     // 外框宽度为12像素，高度为8像素
@@ -579,7 +581,7 @@ void OLED_DrawBattery(uint8_t x, uint8_t y, uint8_t percentage) //! UPDATEDISPLA
 }
 
 // 绘制进度条
-void OLED_DrawProgressBar(uint8_t x, uint8_t y, uint8_t width, uint8_t progress) //! UPDATEDISPLAY REQUIRED
+void OLED_DrawProgressBar(int16_t x, int16_t y, uint8_t width, uint8_t progress) //! UPDATEDISPLAY REQUIRED
 {
     // 绘制进度条外框
     OLED_DrawRectangle(x, y, width, 6);
@@ -763,7 +765,7 @@ void OLED_DrawFilledRectangle(int16_t x, int16_t y, uint8_t width, uint8_t heigh
 }
 
 // 绘制线段 (Bresenham算法)
-void OLED_DrawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) //! UPDATEDISPLAY REQUIRED
+void OLED_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2) //! UPDATEDISPLAY REQUIRED
 {
     int dx = abs(x2 - x1);
     int dy = -abs(y2 - y1);

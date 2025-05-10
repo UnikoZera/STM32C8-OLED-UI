@@ -61,6 +61,12 @@ void Error_Handler(void);
 #define GYRO_SCL_GPIO_Port GPIOB
 #define GYRO_SDA_Pin GPIO_PIN_11
 #define GYRO_SDA_GPIO_Port GPIOB
+#define IPS_SCK_Pin GPIO_PIN_13
+#define IPS_SCK_GPIO_Port GPIOB
+#define IPS_MISO_Pin GPIO_PIN_14
+#define IPS_MISO_GPIO_Port GPIOB
+#define IPS_MOSI_Pin GPIO_PIN_15
+#define IPS_MOSI_GPIO_Port GPIOB
 #define Encoder_CH1_Pin GPIO_PIN_4
 #define Encoder_CH1_GPIO_Port GPIOB
 #define Encoder_CH2_Pin GPIO_PIN_5

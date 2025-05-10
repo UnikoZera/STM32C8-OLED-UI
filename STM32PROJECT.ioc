@@ -1,6 +1,6 @@
 #MicroXplorer Configuration settings - do not modify
-CAD.formats=
-CAD.pinconfig=
+CAD.formats=[]
+CAD.pinconfig=Dual
 CAD.provider=
 File.Version=6
 GPIO.groupedBy=Group By Peripherals
@@ -70,10 +70,16 @@ PB11.GPIOParameters=GPIO_Label
 PB11.GPIO_Label=GYRO_SDA
 PB11.Mode=I2C
 PB11.Signal=I2C2_SDA
+PB13.GPIOParameters=GPIO_Label
+PB13.GPIO_Label=IPS_SCK
 PB13.Mode=Full_Duplex_Master
 PB13.Signal=SPI2_SCK
+PB14.GPIOParameters=GPIO_Label
+PB14.GPIO_Label=IPS_MISO
 PB14.Mode=Full_Duplex_Master
 PB14.Signal=SPI2_MISO
+PB15.GPIOParameters=GPIO_Label
+PB15.GPIO_Label=IPS_MOSI
 PB15.Mode=Full_Duplex_Master
 PB15.Signal=SPI2_MOSI
 PB4.GPIOParameters=GPIO_Label
