@@ -26,37 +26,57 @@ typedef enum
 
 } UI_Page_t;
 
+uint8_t menuRank = 1;                 // 菜单等级
+uint8_t menuSelection = 1;            // 菜单选择项
 UI_Page_t currentPage = UI_PAGE_MENU; // 当前显示的页面
-uint8_t menuSelection = 0;            // 菜单选择项
-uint8_t menuItemCount = 5;            // 菜单项数量
 uint8_t settingsSelection = 0;        // 设置页面选择项
 uint8_t dataIndex = 0;                // 数据索引
+const uint8_t MainMenuItemCount = 5;  // 主菜单项数量
+const uint8_t SettingsItemCount = 5; // 设置项数量
+const uint8_t StatusItemCount = 5;   // 状态项数量
+const uint8_t GamesItemCount = 5;    // 游戏项数量
+const uint8_t ToolsItemCount = 5;    // 工具项数量
+const uint8_t AboutItemCount = 5;    // 关于项数量
 
 #define OLED_UI_START_X -90
 #define OLED_UI_END_X 2
-#define OLED_UI_START_Y 4
+#define OLED_UI_START_Y -6
 #define OLED_UI_GAP_Y 9 + 13
 #define StartTweenTime 3000
 #define TweenStyle EASE_INOUT_CUBIC
 
 void System_UI_Loop()
 {
-    static bool isFirstRun = true;
-    float x, y;
+    static bool isFirstRun = true;  
+    float x, y, x1, y1;
     if (isFirstRun)
     {
-        OLED_MoveObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + 9, OLED_UI_END_X, OLED_UI_START_Y + 9, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Cursor_AnimationManager, "Cursor", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * menuSelection, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * menuSelection, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Cursor_AnimationManager, "CursorScale",  0, 10, strlen("Settings")*6+ 3, 10 , StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, StartTweenTime, TweenStyle);
         HAL_Delay(100);
-        OLED_MoveObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, StartTweenTime, TweenStyle);
         HAL_Delay(100);
-        OLED_MoveObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, StartTweenTime, TweenStyle);
         HAL_Delay(100);
-        OLED_MoveObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, StartTweenTime, TweenStyle);
         HAL_Delay(100);
-        OLED_MoveObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, StartTweenTime, TweenStyle);
         isFirstRun = false;
     }
 
+    #pragma region pager
+
+    OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 500, EASE_OUT_CIRC, true);
+    OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton",   OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 500, EASE_OUT_CIRC, true);
+    OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 500, EASE_OUT_CIRC, true);
+    OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 500, EASE_OUT_CIRC, true);
+    OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 500, EASE_OUT_CIRC, true);
+
+
+    #pragma endregion pager
+
+    #pragma region OLED_Buttons
     OLED_GetObjectPosition(&Menu_AnimationManager, "SettingsButton", &x, &y);
     OLED_DisplayString(x, y, "Settings");
     OLED_GetObjectPosition(&Menu_AnimationManager, "StatusButton", &x, &y);
@@ -67,6 +87,51 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "About");
     OLED_GetObjectPosition(&Menu_AnimationManager, "ToolsButton", &x, &y);
     OLED_DisplayString(x, y, "Tools");
+    #pragma endregion OLED_Buttons
+    if (!isFirstRun)
+        SystemGetsSignal();
+    #pragma region OLED_Cursor
+    OLED_GetObjectPosition(&Cursor_AnimationManager, "Cursor", &x, &y);
+    OLED_GetObjectPosition(&Cursor_AnimationManager, "CursorScale", &x1, &y1);
+    
+    OLED_InvertArea(x - 2, y - 2, x1, y1); // 绘制光标
+    #pragma endregion OLED_Cursor
 
-    OLED_DrawTitleBar("UnikoZera's OLED UI");
+    OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("Settings")*6+ 3+10, 40, 2000, EASE_IN_BOUNCE, true);
+
+    switch (menuSelection)
+    {
+    case 1:
+        OLED_DisplayString((OLED_WIDTH - strlen("Settings For STM") * 6) / 2, 0, "Settings For STM");
+        OLED_InvertArea(x - 2, y - 2, strlen("Settings"), 10); // 绘制光标
+        break;
+    case 2:
+        OLED_DisplayString((OLED_WIDTH - strlen("Machine States") * 6) / 2, 0, "Machine States");
+        OLED_InvertArea(x - 2, y - 2, strlen("States"), 10); // 绘制光标
+        break;
+    case 3:
+        OLED_DisplayString((OLED_WIDTH - strlen("Epicful Games") * 6) / 2, 0, "Epicful Games");
+        OLED_InvertArea(x - 2, y - 2, strlen("Games"), 10); // 绘制光标
+        break;
+    case 4:
+        OLED_DisplayString((OLED_WIDTH - strlen("About Developer") * 6) / 2, 0, "About Developer");
+        break;
+    case 5:
+        OLED_DisplayString((OLED_WIDTH - strlen("Tools For You") * 6) / 2, 0, "Tools For You");
+        OLED_InvertArea(x - 2, y - 2, strlen("Tools"), 10); // 绘制光标
+        break;
+    default:
+        OLED_DrawTitleBar("UnikoZera's UI");
+        break;
+    }
+    if (!isFirstRun)
+        SystemGetsSignal();
+}
+
+void SystemGetsSignal() //这里是旋钮数据的获取
+{
+
+    menuSelection = 4; // 这里是旋钮数据的获取
+
+
 }

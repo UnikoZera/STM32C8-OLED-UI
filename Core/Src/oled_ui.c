@@ -264,12 +264,12 @@ static float GetEaseValue(float progress, EaseType_t easeType)
     }
 }
 
-float MathLerp(float start, float end, float t) //* 线性插值函数可以用来在两个值之间进行插值，t的范围是0到1
-//* start是起始值，end是结束值，t是插值因子，返回值是插值结果
+float MathLerp(float start, float end, float t)
 {
+    // 保证 t 在 0~1 之间
     if (t < 0.0f)
         t = 0.0f;
-    if (t > 1.0f)
+    else if (t > 1.0f)
         t = 1.0f;
     return start + t * (end - start);
 }
@@ -471,7 +471,7 @@ uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag) //
     return 0; // 如果没有找到，返回0表示非活跃
 }
 
-// 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型 bool为是可以在while循环里面使用，如果不使用就不需要函数OLED_UpdateAnimationManager就可以使用
+// 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型 bool为是可以在while循环里面使用
 void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType, bool enablePrevMutiUseCalling)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);

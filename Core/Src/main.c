@@ -60,7 +60,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int count = 0; // 计数器
+float count = 0; // 计数器
 float x, y;//这个是为了获取动画坐标初始值的中间变量
 /* USER CODE END 0 */
 
@@ -103,10 +103,7 @@ int main(void)
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
 
-  // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1); // 启动PWM
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
-  // InitBlockAnimation(); // 初始化方块动画
-  // AnimationLoop(); // 执行动画循环
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
@@ -119,8 +116,8 @@ int main(void)
   {    
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
-
     System_UI_Loop(); // UI循环
+
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
     OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
