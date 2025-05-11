@@ -120,9 +120,6 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "About");
     OLED_GetObjectPosition(&Menu_AnimationManager, "ToolsButton", &x, &y);
     OLED_DisplayString(x, y, "Tools");
-    OLED_GetObjectPosition(&g_AnimationManager, "Cursor", &x, &y);
-    OLED_GetObjectPosition(&g_AnimationManager, "CursorScale", &x1, &y1);
-    OLED_InvertArea(x - 2, y - 2, x1, y1); // 绘制光标
     OLED_GetObjectPosition(&Games_AnimationManager, "Snake", &x, &y);
     OLED_DisplayString(x, y, "Snake");
     OLED_GetObjectPosition(&Games_AnimationManager, "2048", &x, &y);
@@ -130,6 +127,9 @@ void System_UI_Loop()
     OLED_GetObjectPosition(&g_AnimationManager, "BackButton", &x, &y);
     OLED_DisplayString(x, y, "Back");
 
+    OLED_GetObjectPosition(&g_AnimationManager, "Cursor", &x, &y);
+    OLED_GetObjectPosition(&g_AnimationManager, "CursorScale", &x1, &y1);
+    OLED_InvertArea(x - 2, y - 2, x1, y1); // 绘制光标
     #pragma endregion DRAWER
 
 
@@ -192,12 +192,12 @@ void System_UI_Loop()
         {
         case 1:
             // OLED_DisplayString((OLED_WIDTH - strlen("Snake") * 6) / 2, 0, "Snake");
-            OLED_DrawTitleBar("Snake");
+            OLED_DrawTitleBar("Greedy Snake");
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Snake")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
             break;
         case 2:
             // OLED_DisplayString((OLED_WIDTH - strlen("2048") * 6) / 2, 0, "2048");
-            OLED_DrawTitleBar("2048");
+            OLED_DrawTitleBar("Here is 2048!");
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("2048")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
             break;
         case 3:
@@ -214,17 +214,41 @@ void System_UI_Loop()
     
     
     SystemGetsSignal();
-    OLED_DisplayInteger(32, 32, menuSelection); // 显示编码器计数值
 }
 
 
 void SystemGetsSignal() //这里是旋钮数据的获取
 {
     static uint16_t preCount = 32767;
+    uint16_t pageCount;
+    if (currentPage == UI_PAGE_MENU)
+    {
+        pageCount = MainMenuItemCount;
+    }
+    else if (currentPage == UI_PAGE_SETTINGS)
+    {
+        pageCount = SettingsItemCount;
+    }
+    else if (currentPage == UI_PAGE_STATUS)
+    {
+        pageCount = StatusItemCount;
+    }
+    else if (currentPage == UI_PAGE_ABOUT)
+    {
+        pageCount = AboutItemCount;
+    }
+    else if (currentPage == UI_PAGE_TOOLS)
+    {
+        pageCount = ToolsItemCount;
+    }
+    else if (currentPage == UI_PAGE_GAMES)
+    {
+        pageCount = GamesItemCount;
+    }
 
     if(count-preCount > 1)
     {
-        if(menuSelection < MainMenuItemCount)
+        if(menuSelection < pageCount)
         {
             menuSelection++;
         }
@@ -244,7 +268,7 @@ void SystemGetsSignal() //这里是旋钮数据的获取
         }
         else
         {
-            menuSelection = MainMenuItemCount;
+            menuSelection = pageCount;
         }
 
         preCount = count;
@@ -258,21 +282,47 @@ void SystemGetsSignal() //这里是旋钮数据的获取
             if (menuRank == 1 && menuSelection == 1)
             {
                 menuRank = 2;
-                currentPage = UI_PAGE_SETTINGS;
+                currentPage = UI_PAGE_GAMES;
                 OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 1000, EASE_IN_CIRC, false);
                 OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 1000, EASE_IN_CIRC, false);
                 OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 1000, EASE_IN_CIRC, false);
                 OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 1000, EASE_IN_CIRC, false);
                 OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 1000, EASE_IN_CIRC, false);
 
-                // OLED_DoTweenObject(&g_AnimationManager, "Cursor", -50, 10, 100, EASE_IN_CIRC, false);
-                OLED_DoTweenObjectX(&g_AnimationManager, "Cursor", -100, 1000, EASE_IN_CIRC);
+                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 1, 10, 1000, EASE_IN_EXPO, false);
                 OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC, false);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC, false);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC, false);
             }
+            else if (menuRank == 2 && menuSelection == 3)
+            {
+                menuRank = 1;
+                menuSelection = 1;
+                currentPage = UI_PAGE_MENU;
+                
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 1, 10, 1000, EASE_IN_EXPO, false);
+                
+                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 1000, EASE_IN_CIRC, false);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 1000, EASE_IN_CIRC, false);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 1000, EASE_IN_CIRC, false);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 1000, EASE_IN_CIRC, false);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 1000, EASE_IN_CIRC, false);
+            }
+            
+
+
+
+
+
             while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
             {
 

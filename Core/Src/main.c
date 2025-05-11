@@ -137,9 +137,6 @@ int main(void)
     
     System_UI_Loop(); // UI循环
     
-
-    
-    
     
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率

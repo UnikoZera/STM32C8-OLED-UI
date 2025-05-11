@@ -1,2 +1,2 @@
 ../Core/Src/oled_driver.c:48:6:System_UI_Loop	31
-../Core/Src/oled_driver.c:221:6:SystemGetsSignal	10
+../Core/Src/oled_driver.c:220:6:SystemGetsSignal	18
