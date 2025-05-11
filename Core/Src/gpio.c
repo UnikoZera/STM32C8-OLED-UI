@@ -63,7 +63,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : Encoder_Input_Pin */
   GPIO_InitStruct.Pin = Encoder_Input_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(Encoder_Input_GPIO_Port, &GPIO_InitStruct);
 
 }

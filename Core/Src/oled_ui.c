@@ -297,7 +297,6 @@ uint8_t OLED_UpdateAnimation(Animation_t *anim, uint32_t currentTime)
         return 0;
 
     uint32_t elapsedTime = currentTime - anim->startTime;
-
     // 动画完成
     if (elapsedTime >= anim->duration || anim->currentValue == anim->endValue) // 如果我的目标在指定的点上，也关闭isActive
     {
@@ -376,7 +375,12 @@ void AnimationLoop()
 
 // 动画管理器全局管理部分
 AnimationManager_t Menu_AnimationManager;
-AnimationManager_t Cursor_AnimationManager;
+AnimationManager_t Games_AnimationManager;
+AnimationManager_t Tools_AnimationManager;
+AnimationManager_t Settings_AnimationManager;
+AnimationManager_t About_AnimationManager;
+AnimationManager_t Status_AnimationManager;
+AnimationManager_t g_Title_AnimationManager; // 菜单动画管理器
 AnimationManager_t g_AnimationManager; // 全局动画管理器
 
 void OLED_InitAnimationManager(AnimationManager_t *manager) // 这是初始化一个动画管理器，填入你的manager名字，在系统初始化时候调用它

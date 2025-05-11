@@ -118,7 +118,14 @@ int main(void)
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
-  OLED_InitAnimationManager(&Cursor_AnimationManager); // 初始化光标动画管理器
+  OLED_InitAnimationManager(&Games_AnimationManager); // 初始化游戏动画管理器
+  OLED_InitAnimationManager(&Tools_AnimationManager); // 初始化工具动画管理器
+  OLED_InitAnimationManager(&Settings_AnimationManager); // 初始化设置动画管理器
+  OLED_InitAnimationManager(&About_AnimationManager); // 初始化关于动画管理器
+  OLED_InitAnimationManager(&Status_AnimationManager); // 初始化状态动画管理器
+  OLED_InitAnimationManager(&g_Title_AnimationManager); // 初始化标题动画管理器
+  __HAL_TIM_SET_COUNTER(&htim3, 32767);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -127,17 +134,26 @@ int main(void)
   {    
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
+    
     System_UI_Loop(); // UI循环
+    
 
-    OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
-    OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
-    OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
+    
+    
+    
+    
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
-
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
-
-
+    OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
+    OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
+    OLED_UpdateAnimationManager(&Games_AnimationManager); // 更新游戏动画管理器
+    OLED_UpdateAnimationManager(&Tools_AnimationManager); // 更新工具动画管理器
+    OLED_UpdateAnimationManager(&Settings_AnimationManager); // 更新设置动画管理器
+    OLED_UpdateAnimationManager(&About_AnimationManager); // 更新关于动画管理器
+    OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
+    OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
     OLED_SmartUpdate(); // 智能更新显示
+
     #pragma endregion OLED_UI_SETTINGS
 
 

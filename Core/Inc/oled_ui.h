@@ -69,8 +69,13 @@ typedef struct
 } AnimationManager_t; // 动画管理器结构体，每个动画对象都有一个标签和两个动画（X和Y坐标）他包含了多个动画对象的数组和一个计数器，表示当前动画对象的数量
 
 extern AnimationManager_t Menu_AnimationManager;
-extern AnimationManager_t Cursor_AnimationManager;
 extern AnimationManager_t g_AnimationManager; // 全局动画管理器
+extern AnimationManager_t Games_AnimationManager; // 游戏动画管理器
+extern AnimationManager_t Tools_AnimationManager; // 工具动画管理器
+extern AnimationManager_t Settings_AnimationManager; // 设置动画管理器
+extern AnimationManager_t About_AnimationManager; // 关于动画管理器
+extern AnimationManager_t Status_AnimationManager; // 状态动画管理器
+extern AnimationManager_t g_Title_AnimationManager; // 菜单动画管理器
 
 #pragma region funcs// 动画函数声明
 
