@@ -1,6 +1,6 @@
 ../Core/Src/oled.c:123:6:OLED_InitBuffer	2
 ../Core/Src/oled.c:144:6:OLED_ClearBuffer	2
-../Core/Src/oled.c:156:9:OLED_IsBusy	5
+../Core/Src/oled.c:156:9:OLED_IsBusy	4
 ../Core/Src/oled.c:174:6:OLED_UpdateDisplayVSync	4
 ../Core/Src/oled.c:205:6:OLED_UpdateDisplayDMA	5
 ../Core/Src/oled.c:238:6:OLED_UpdateDisplayPartial	6

@@ -13,6 +13,17 @@
         "STDIO.H": "cpp",
         "MATH.H": "cpp",
         "STRING.H": "cpp",
-        "winapifamily.h": "c"
+        "winapifamily.h": "c",
+        "bit": "c",
+        "chrono": "c",
+        "cmath": "c",
+        "list": "c",
+        "functional": "c",
+        "random": "c",
+        "format": "c",
+        "limits": "c",
+        "ranges": "c",
+        "variant": "c",
+        "*.def": "c"
     }
 }

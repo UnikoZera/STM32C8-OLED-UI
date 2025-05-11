@@ -63,8 +63,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float count = 0; // 计数器
-float x, y;//这个是为了获取动画坐标初始值的中间变量
+uint16_t count = 0; // 旋钮数据
 /* USER CODE END 0 */
 
 /**
@@ -111,7 +110,11 @@ int main(void)
   OLED_EnableFastUpdate(1); // 启用快速更新
 
   
+  // HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
+  // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1); // 启动编码器
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // 启动编码器
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
@@ -130,6 +133,10 @@ int main(void)
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
     OLED_UpdateAnimationManager(&Cursor_AnimationManager); // 更新光标动画管理器
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
+
+    count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
+
+
     OLED_SmartUpdate(); // 智能更新显示
     #pragma endregion OLED_UI_SETTINGS
 

@@ -7,7 +7,7 @@
 
 #include "oled_driver.h"
 #include "oled_ui.h"
-
+#include "main.h"
 // UI 常量定义
 #define UI_MAX_PAGES 5      // 最大页面数
 #define UI_TITLE_HEIGHT 1   // 标题栏高度(页)
@@ -76,7 +76,7 @@ void System_UI_Loop()
 
     #pragma endregion pager
 
-    #pragma region OLED_Buttons
+    #pragma region DRAWER
     OLED_GetObjectPosition(&Menu_AnimationManager, "SettingsButton", &x, &y);
     OLED_DisplayString(x, y, "Settings");
     OLED_GetObjectPosition(&Menu_AnimationManager, "StatusButton", &x, &y);
@@ -87,51 +87,88 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "About");
     OLED_GetObjectPosition(&Menu_AnimationManager, "ToolsButton", &x, &y);
     OLED_DisplayString(x, y, "Tools");
-    #pragma endregion OLED_Buttons
-    if (!isFirstRun)
-        SystemGetsSignal();
-    #pragma region OLED_Cursor
     OLED_GetObjectPosition(&Cursor_AnimationManager, "Cursor", &x, &y);
     OLED_GetObjectPosition(&Cursor_AnimationManager, "CursorScale", &x1, &y1);
     
     OLED_InvertArea(x - 2, y - 2, x1, y1); // 绘制光标
-    #pragma endregion OLED_Cursor
-
-    OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("Settings")*6+ 3+10, 40, 2000, EASE_IN_BOUNCE, true);
-
-    switch (menuSelection)
-    {
-    case 1:
-        OLED_DisplayString((OLED_WIDTH - strlen("Settings For STM") * 6) / 2, 0, "Settings For STM");
-        OLED_InvertArea(x - 2, y - 2, strlen("Settings"), 10); // 绘制光标
-        break;
-    case 2:
-        OLED_DisplayString((OLED_WIDTH - strlen("Machine States") * 6) / 2, 0, "Machine States");
-        OLED_InvertArea(x - 2, y - 2, strlen("States"), 10); // 绘制光标
-        break;
-    case 3:
-        OLED_DisplayString((OLED_WIDTH - strlen("Epicful Games") * 6) / 2, 0, "Epicful Games");
-        OLED_InvertArea(x - 2, y - 2, strlen("Games"), 10); // 绘制光标
-        break;
-    case 4:
-        OLED_DisplayString((OLED_WIDTH - strlen("About Developer") * 6) / 2, 0, "About Developer");
-        break;
-    case 5:
-        OLED_DisplayString((OLED_WIDTH - strlen("Tools For You") * 6) / 2, 0, "Tools For You");
-        OLED_InvertArea(x - 2, y - 2, strlen("Tools"), 10); // 绘制光标
-        break;
-    default:
-        OLED_DrawTitleBar("UnikoZera's UI");
-        break;
-    }
+    #pragma endregion DRAWER
     if (!isFirstRun)
         SystemGetsSignal();
+
+    if (menuRank == 1)
+    {
+        switch (menuSelection)
+        {
+        case 1:
+            // OLED_DisplayString((OLED_WIDTH - strlen("Settings For STM") * 6) / 2, 0, "Settings For STM");
+            OLED_DrawTitleBar("Settings For STM");
+            OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("Settings")*6+ 3, 10, 200, EASE_IN_CIRC, true);
+            break;
+        case 2:
+            // OLED_DisplayString((OLED_WIDTH - strlen("Machine States") * 6) / 2, 0, "Machine States");
+            OLED_DrawTitleBar("Machine States");
+            // OLED_InvertArea(x - 2, y - 2, strlen("States"), 10); // 绘制光标
+            OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("States")*6+ 3, 10, 200, EASE_IN_CIRC, true);
+            break;
+        case 3:
+            // OLED_DisplayString((OLED_WIDTH - strlen("Epicful Games") * 6) / 2, 0, "Epicful Games");
+            OLED_DrawTitleBar("Epicful Games");
+            // OLED_InvertArea(x - 2, y - 2, strlen("Games"), 10); // 绘制光标
+            OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("Games")*6+ 3, 10, 200, EASE_IN_CIRC, true);
+            break;
+        case 4:
+            // OLED_DisplayString((OLED_WIDTH - strlen("About Developer") * 6) / 2, 0, "About Developer");
+            OLED_DrawTitleBar("About Developer");
+            // OLED_InvertArea(x - 2, y - 2, strlen("Developer"), 10); // 绘制光标
+            OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("About")*6+ 3, 10, 200, EASE_IN_CIRC, true);
+            break;
+        case 5:
+            // OLED_DisplayString((OLED_WIDTH - strlen("Tools For You") * 6) / 2, 0, "Tools For You");
+            OLED_DrawTitleBar("Tools For You");
+            // OLED_InvertArea(x - 2, y - 2, strlen("Tools"), 10); // 绘制光标
+            OLED_DoTweenObject(&Cursor_AnimationManager, "CursorScale", strlen("Tools")*6+ 3, 10, 200, EASE_IN_CIRC, true);
+            break;
+        default:
+            OLED_DrawTitleBar("UnikoZera's UI");
+            break;
+        }
+    }
+    
 }
+
 
 void SystemGetsSignal() //这里是旋钮数据的获取
 {
+    static uint16_t preCount = 0;
 
-    menuSelection = 4; // 这里是旋钮数据的获取
+    if(count-preCount > 1)
+    {
+        if(menuSelection < MainMenuItemCount)
+        {
+            menuSelection++;
+        }
+        else
+        {
+            menuSelection = 1;
+        }
+
+        preCount = count;
+    }
+    else if(count-preCount < -1)
+    {
+        if(menuSelection > 1)
+        {
+            menuSelection--;
+        }
+        else
+        {
+            menuSelection = MainMenuItemCount;
+        }
+
+        preCount = count;
+    }
+
+
 
 
 }

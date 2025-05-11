@@ -161,7 +161,7 @@ uint8_t OLED_IsBusy(void)
         // SSD1315/SSD1306 典型帧率约为60Hz，每帧约16.7ms
         // 可以根据需要调整刷新率，减小此值可以提高帧率
         uint32_t current_time = HAL_GetTick();
-        if (current_time - oled_last_update_time >= 3) // 减少到3ms
+        if (current_time - oled_last_update_time >= 0)
         {
             oled_update_flag = OLED_READY; // 已经过了足够时间，不再忙
         }
