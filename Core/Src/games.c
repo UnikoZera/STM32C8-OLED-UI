@@ -14,7 +14,7 @@
 // Game state variables
 static Snake snake;
 static Food food;
-static bool gameOver;
+bool gameOver;
 static uint32_t gameTickLast; // For controlling game speed
 #define GAME_TICK_MS 100      // Snake moves every 200ms, adjust for speed
 
@@ -72,8 +72,6 @@ void Snake_InitGame(void)
 
     Snake_GenerateFood();
     gameTickLast = HAL_GetTick();
-    OLED_ClearBuffer();        // Clear display before starting
-    OLED_UpdateDisplayVSync(); // Update the cleared display
 }
 
 static void Snake_Draw(void)
@@ -193,6 +191,7 @@ void Snake_HandleInput(Direction input_dir)
 void Snake_GameLoop(void)
 {
     static uint16_t LastCount = 32767;
+    static bool preMutiTurn = false;
     // This function would typically be called repeatedly from your main loop or a timer interrupt.
     // For now, let's assume it's called, and we manage ticks internally.
 
@@ -202,29 +201,37 @@ void Snake_GameLoop(void)
     // if (current_input != NO_INPUT) { // Assuming NO_INPUT if no direction change
     //     Snake_HandleInput(current_input);
     // }
-    if (count - LastCount > 1)
+    if (!preMutiTurn)
     {
-        if (snake.dir == DIR_UP)
-            Snake_HandleInput(DIR_RIGHT);
-        else if (snake.dir == DIR_DOWN)
-            Snake_HandleInput(DIR_LEFT);
-        else if (snake.dir == DIR_LEFT)
-            Snake_HandleInput(DIR_UP);
-        else if (snake.dir == DIR_RIGHT)
-            Snake_HandleInput(DIR_DOWN);
-        LastCount = count;
-    }
-    else if (count - LastCount < -1)
-    {
-        if (snake.dir == DIR_UP)
-            Snake_HandleInput(DIR_LEFT);
-        else if (snake.dir == DIR_DOWN)
-            Snake_HandleInput(DIR_RIGHT);
-        else if (snake.dir == DIR_LEFT)
-            Snake_HandleInput(DIR_DOWN);
-        else if (snake.dir == DIR_RIGHT)
-            Snake_HandleInput(DIR_UP);
-        LastCount = count;
+        if (count - LastCount > 1)
+        {
+            if (snake.dir == DIR_UP)
+                Snake_HandleInput(DIR_RIGHT);
+            else if (snake.dir == DIR_DOWN)
+
+                Snake_HandleInput(DIR_LEFT);
+            else if (snake.dir == DIR_LEFT)
+                Snake_HandleInput(DIR_UP);
+            else if (snake.dir == DIR_RIGHT)
+                Snake_HandleInput(DIR_DOWN);
+
+            preMutiTurn = true;
+            LastCount = count;
+        }
+        else if (count - LastCount < -1)
+        {
+            if (snake.dir == DIR_UP)
+                Snake_HandleInput(DIR_LEFT);
+            else if (snake.dir == DIR_DOWN)
+                Snake_HandleInput(DIR_RIGHT);
+            else if (snake.dir == DIR_LEFT)
+                Snake_HandleInput(DIR_DOWN);
+            else if (snake.dir == DIR_RIGHT)
+                Snake_HandleInput(DIR_UP);
+
+            preMutiTurn = true;
+            LastCount = count;
+        }
     }
     
 
@@ -232,6 +239,7 @@ void Snake_GameLoop(void)
     {
         Snake_Update();
         gameTickLast = HAL_GetTick();
+        preMutiTurn = false;
     }
     Snake_Draw(); // Draw regardless of tick, for smoother animation if needed, or only after update.
 
@@ -242,8 +250,12 @@ void Snake_GameLoop(void)
         {
             HAL_Delay(50); // Debounce delay
             if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
+            {
                 Snake_InitGame(); // Or handle restart explicitly elsewhere
-            while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_SET);
+                OLED_DisplayString(0, 0, "Score: 0"); // Display title or status
+            }
+            while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET);
+            
         }
         // For now, it just stops updating and shows "GAME OVER"
     }

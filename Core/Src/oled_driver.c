@@ -39,6 +39,8 @@ const uint8_t StatusItemCount = 5;    // 状态项数量
 const uint8_t GamesItemCount = 3;     // 游戏项数量
 const uint8_t ToolsItemCount = 5;     // 工具项数量
 const uint8_t AboutItemCount = 5;     // 关于项数量
+static bool cancelSelection = false;
+
 
 #define OLED_UI_START_X -90
 #define OLED_UI_END_X 2
@@ -52,6 +54,7 @@ const uint8_t AboutItemCount = 5;     // 关于项数量
 void System_UI_Loop()
 {
     static bool isFirstRun = true;
+
     float x, y, x1, y1;
     if (!isFirstRun)
         SystemGetsSignal();
@@ -293,6 +296,32 @@ void System_UI_Loop()
             break;
         }
     }
+    else if (menuRank == 3 && currentPage == UI_PAGE_GAMES && menuSelection == 1)
+    {
+        cancelSelection = true;
+        Snake_GameLoop();
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_GAMES && menuSelection == 2)
+    {
+        /* code */
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_SETTINGS)
+    {
+        /* code */
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_STATUS)
+    {
+        /* code */
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT)
+    {
+        /* code */
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_TOOLS)
+    {
+        /* code */
+    }
+    
 #pragma endregion PlayerSelection
 
 #pragma region ResetAnimation //完成换级时候让动画复位
@@ -337,38 +366,43 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
         pageCount = GamesItemCount;
     }
 
-    if (count - preCount > 1)
+    if (!cancelSelection)
     {
-        if (menuSelection < pageCount)
+        if (count - preCount > 1)
         {
-            menuSelection++;
-        }
-        else
-        {
-            menuSelection = 1;
-        }
+            if (menuSelection < pageCount)
+            {
+                menuSelection++;
+            }
+            else
+            {
+                menuSelection = 1;
+            }
 
-        preCount = count;
+            preCount = count;
+        }
+        else if (count - preCount < -1)
+        {
+
+            if (menuSelection > 1)
+            {
+                menuSelection--;
+            }
+            else
+            {
+                menuSelection = pageCount;
+            }
+
+            preCount = count;
+        }
     }
-    else if (count - preCount < -1)
-    {
-
-        if (menuSelection > 1)
-        {
-            menuSelection--;
-        }
-        else
-        {
-            menuSelection = pageCount;
-        }
-
+    else
         preCount = count;
-    }
 
     if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
     {
         HAL_Delay(50); // 防抖动延时
-        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
+        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET && !gameOver)
         {
             if (menuRank == 1 && menuSelection == 1)
             {
@@ -410,6 +444,36 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
                 OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, 1000, EASE_IN_CIRC);
+            }
+            else if (menuRank == 2 && menuSelection == 1)
+            {
+                menuRank = 3;
+                currentPage = UI_PAGE_GAMES;
+                Snake_InitGame();
+                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+                OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", 0, 8, 1000, EASE_IN_CUBIC);
+                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 0, 8, 1000, EASE_INOUT_CIRC);
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
+            }
+            else if (menuRank == 3 && menuSelection == 1 && cancelSelection && UI_PAGE_GAMES && !gameOver)
+            {
+                menuRank = 2;
+                currentPage = UI_PAGE_GAMES;
+                
+                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_End_Y, 1000, EASE_IN_CUBIC);
+                OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Greedy Snake") * 6 + 3, 8, 1000, EASE_IN_CUBIC);
+
+                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Snake") * 6 + 3, 10, 1000, EASE_INOUT_CIRC);
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
+                cancelSelection = false;
             }
 
             while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
