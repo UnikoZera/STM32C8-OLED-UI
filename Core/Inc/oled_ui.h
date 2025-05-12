@@ -93,7 +93,7 @@ void OLED_MoveObject(AnimationManager_t *manager, const char *tag,
 void OLED_UpdateAnimationManager(AnimationManager_t *manager);
 uint8_t OLED_GetObjectPosition(AnimationManager_t *manager, const char *tag, float *x, float *y);
 uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag);                                                                                              // 返回值是1表示活跃，0表示非活跃
-void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType, bool enablePrevMutiUseCalling); // 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType);
 void OLED_MoveObjectAxis(AnimationManager_t *manager, const char *tag,
                          float startX, float startY, float targetX, float targetY,
                          uint32_t duration, EaseType_t easeType, bool onlyX, bool onlyY);                                      // 为X或Y轴单独创建动画的函数

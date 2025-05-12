@@ -1,0 +1,7 @@
+../Core/Src/games.c:22:13:DrawBlock	24	static
+../Core/Src/games.c:28:13:Snake_GenerateFood	16	static
+../Core/Src/games.c:49:6:Snake_InitGame	16	static
+../Core/Src/games.c:79:13:Snake_Draw	16	static
+../Core/Src/games.c:103:13:Snake_Update	16	static
+../Core/Src/games.c:182:6:Snake_HandleInput	16	static
+../Core/Src/games.c:193:6:Snake_GameLoop	40	static

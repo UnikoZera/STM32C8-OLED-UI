@@ -24,6 +24,7 @@
         "limits": "c",
         "ranges": "c",
         "variant": "c",
-        "*.def": "c"
+        "*.def": "c",
+        "oled_driver.h": "c"
     }
 }

@@ -1,0 +1,7 @@
+../Core/Src/games.c:22:13:DrawBlock	1
+../Core/Src/games.c:28:13:Snake_GenerateFood	5
+../Core/Src/games.c:49:6:Snake_InitGame	2
+../Core/Src/games.c:79:13:Snake_Draw	4
+../Core/Src/games.c:103:13:Snake_Update	18
+../Core/Src/games.c:182:6:Snake_HandleInput	9
+../Core/Src/games.c:193:6:Snake_GameLoop	16

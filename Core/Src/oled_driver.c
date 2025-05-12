@@ -8,6 +8,7 @@
 #include "oled_driver.h"
 #include "oled_ui.h"
 #include "main.h"
+
 // UI 常量定义
 #define UI_MAX_PAGES 5      // 最大页面数
 #define UI_TITLE_HEIGHT 1   // 标题栏高度(页)
@@ -31,12 +32,13 @@ uint8_t menuSelection = 1;            // 菜单选择项
 UI_Page_t currentPage = UI_PAGE_MENU; // 当前显示的页面
 uint8_t settingsSelection = 0;        // 设置页面选择项
 uint8_t dataIndex = 0;                // 数据索引
+static uint8_t preMenuSelection = 0; // 上一个菜单选择项
 const uint8_t MainMenuItemCount = 5;  // 主菜单项数量
-const uint8_t SettingsItemCount = 5; // 设置项数量
-const uint8_t StatusItemCount = 5;   // 状态项数量
-const uint8_t GamesItemCount = 3;    // 游戏项数量
-const uint8_t ToolsItemCount = 5;    // 工具项数量
-const uint8_t AboutItemCount = 5;    // 关于项数量
+const uint8_t SettingsItemCount = 5;  // 设置项数量
+const uint8_t StatusItemCount = 5;    // 状态项数量
+const uint8_t GamesItemCount = 3;     // 游戏项数量
+const uint8_t ToolsItemCount = 5;     // 工具项数量
+const uint8_t AboutItemCount = 5;     // 关于项数量
 
 #define OLED_UI_START_X -90
 #define OLED_UI_END_X 2
@@ -49,61 +51,83 @@ const uint8_t AboutItemCount = 5;    // 关于项数量
 
 void System_UI_Loop()
 {
-    static bool isFirstRun = true;  
+    static bool isFirstRun = true;
     float x, y, x1, y1;
-    uint16_t preMenuSelection;
-    if (isFirstRun)
+    if (!isFirstRun)
+        SystemGetsSignal();
+
+    if (isFirstRun) //第一次启动调用，初始化部分
     {
-        #pragma region 标题栏
+#pragma region 标题栏
         OLED_MoveObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_End_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Developer") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        
-        OLED_MoveObject(&g_Title_AnimationManager, "SnakeTitle", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        OLED_MoveObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        OLED_MoveObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6) , OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        #pragma endregion 标题栏
 
+        OLED_MoveObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+#pragma endregion 标题栏
+
+#pragma region 游戏栏
         OLED_MoveObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
         OLED_MoveObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
         OLED_MoveObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1, TweenStyle);
+#pragma endregion 游戏栏
 
-        #pragma region 主菜单动画
-        OLED_MoveObject(&g_AnimationManager, "TitleBGScale", 0, 8, strlen("Epicful Games")*6+3, 8, StartTweenTime, EASE_INOUT_CUBIC);
+#pragma region 工具栏
+
+
+#pragma endregion 工具栏
+
+#pragma region 状态栏
+
+#pragma endregion 状态栏
+
+#pragma region 设置栏
+
+#pragma endregion 设置栏
+
+#pragma region 关于栏
+
+#pragma endregion 关于栏
+
+#pragma region 主菜单动画
+        OLED_MoveObject(&g_AnimationManager, "TitleBGScale", 0, 8, strlen("Epicful Games") * 6 + 3, 8, StartTweenTime, EASE_INOUT_CUBIC);
         OLED_MoveObject(&g_AnimationManager, "Cursor", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * menuSelection, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * menuSelection, StartTweenTime, TweenStyle);
-        OLED_MoveObject(&g_AnimationManager, "CursorScale",  0, 10, strlen("Games")*6+ 3, 10 , StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_AnimationManager, "CursorScale", 0, 10, strlen("Games") * 6 + 3, 10, StartTweenTime, TweenStyle);
         OLED_MoveObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, StartTweenTime, TweenStyle);
-        // HAL_Delay(100);
+        HAL_Delay(100);
         OLED_MoveObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, StartTweenTime, TweenStyle);
-        // HAL_Delay(100);
+        HAL_Delay(100);
         OLED_MoveObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, StartTweenTime, TweenStyle);
-        // HAL_Delay(100);
+        HAL_Delay(100);
         OLED_MoveObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, StartTweenTime, TweenStyle);
-        // HAL_Delay(100);
+        HAL_Delay(100);
         OLED_MoveObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, StartTweenTime, TweenStyle);
-        #pragma endregion 主菜单动画
-        
+#pragma endregion 主菜单动画
+
         preMenuSelection = menuSelection;
+        isFirstRun = false;
         OLED_UpdateDisplayVSync();
     }
 
-    #pragma region pager
+#pragma region pager //翻页的函数
 
     if (menuRank == 1)
     {
-        OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton",   OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton",    OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 200, EASE_IN_CIRC, true);
+        OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 200, EASE_IN_CIRC);
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_GAMES)
     {
-        OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 200, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 200, EASE_IN_CIRC, true);
+        OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 200, EASE_IN_CIRC);
+        OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 200, EASE_IN_CIRC);
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_SETTINGS)
     {
@@ -121,18 +145,17 @@ void System_UI_Loop()
     {
         /* code */
     }
-    
 
-    #pragma endregion pager
+#pragma endregion pager
 
-    #pragma region DRAWER
+#pragma region DRAWER //画出你的UI
 
     OLED_GetObjectPosition(&Menu_AnimationManager, "SettingsButton", &x, &y);
     OLED_DisplayString(x, y, "Settings");
     OLED_GetObjectPosition(&Menu_AnimationManager, "StatusButton", &x, &y);
-    OLED_DisplayString(x , y, "Status");
+    OLED_DisplayString(x, y, "Status");
     OLED_GetObjectPosition(&Menu_AnimationManager, "GamesButton", &x, &y);
-    OLED_DisplayString(x , y, "Games");
+    OLED_DisplayString(x, y, "Games");
     OLED_GetObjectPosition(&Menu_AnimationManager, "AboutButton", &x, &y);
     OLED_DisplayString(x, y, "About");
     OLED_GetObjectPosition(&Menu_AnimationManager, "ToolsButton", &x, &y);
@@ -144,7 +167,6 @@ void System_UI_Loop()
     OLED_GetObjectPosition(&g_AnimationManager, "BackButton", &x, &y);
     OLED_DisplayString(x, y, "Back");
 
-
     OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleGames", &x, &y);
     OLED_DisplayString(x, y, "Epicful Games");
     OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleTools", &x, &y);
@@ -155,93 +177,71 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "STM Settings");
     OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleAbout", &x, &y);
     OLED_DisplayString(x, y, "Developer!");
-
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleSnake", &x, &y);
+    OLED_DisplayString(x, y, "Greedy Snake");
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "Title2048", &x, &y);
+    OLED_DisplayString(x, y, "Here is 2048!");
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleBack", &x, &y);
+    OLED_DisplayString(x, y, "Back To Menu");
 
     OLED_GetObjectPosition(&g_AnimationManager, "TitleBGScale", &x, &y);
-    OLED_InvertArea(OLED_WIDTH-x, 0, x, y);
+    OLED_InvertArea(OLED_WIDTH - x, 0, x, y);
 
     OLED_GetObjectPosition(&g_AnimationManager, "Cursor", &x, &y);
     OLED_GetObjectPosition(&g_AnimationManager, "CursorScale", &x1, &y1);
     OLED_InvertArea(x - 2, y - 2, x1, y1); // 绘制光标
-    #pragma endregion DRAWER
+#pragma endregion DRAWER
 
-
-
-
-    #pragma region PlayerSelection
+#pragma region PlayerSelection //选择某个选项时候的详细内容
     if (menuRank == 1)
     {
-        static bool ForceSet = true;
-
-        if (preMenuSelection != menuSelection)
-            ForceSet = true;
-
         switch (menuSelection)
         {
         case 1:
-            if (ForceSet)
-            {
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", OLED_WIDTH - strlen("Machine States") * 6, OLED_TITLE_Start_Y, 1, TweenStyle, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", OLED_WIDTH - strlen("STM Settings") * 6, OLED_TITLE_Start_Y, 1, TweenStyle, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC, false);
-                ForceSet = false;
-            }
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale",strlen("Epicful Games")*6+3, 8, 500, EASE_IN_CUBIC, true);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Games")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, 500, TweenStyle);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", OLED_WIDTH - strlen("Machine States") * 6, OLED_TITLE_Start_Y, 1, TweenStyle);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", OLED_WIDTH - strlen("STM Settings") * 6, OLED_TITLE_Start_Y, 1, TweenStyle);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Epicful Games") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Games") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 2:
-            if (ForceSet)
-            {
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC, false);
-                ForceSet = false;
-            }
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale",strlen("Tools for you")*6+3, 8, 500, EASE_IN_CUBIC, true);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Tools")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Tools for you") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Tools") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 3:
-            if (ForceSet)
-            {
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC, false);
-                ForceSet = false;
-            }
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale",strlen("Machine States")*6+3, 8, 500, EASE_IN_CUBIC, true);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("States")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Machine States") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("States") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 4:
-            if (ForceSet)
-            {
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC, false);
-                ForceSet = false;
-            }
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale",strlen("STM Settings")*6+3, 8, 500, EASE_IN_CUBIC, true);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Settings")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("STM Settings") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Settings") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 5:
-            if (ForceSet)
-            {
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC, false);
-                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC, false);
-                ForceSet = false;
-            }
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale",strlen("Developer!")*6+3, 8, 500, EASE_IN_CUBIC, true);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("About")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleTools", (OLED_WIDTH - strlen("Tools For You") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSettings", (OLED_WIDTH - strlen("STM Settings") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Developer!") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("About") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         default:
             OLED_DrawTitleBar("UnikoZera's UI");
@@ -250,7 +250,6 @@ void System_UI_Loop()
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_SETTINGS)
     {
-
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_STATUS)
     {
@@ -269,48 +268,48 @@ void System_UI_Loop()
         switch (menuSelection)
         {
         case 1:
-            // OLED_DisplayString((OLED_WIDTH - strlen("Snake") * 6) / 2, 0, "Snake");
-            OLED_DrawTitleBar("Greedy Snake");
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Snake")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGames", (OLED_WIDTH - strlen("Epicful Games") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Greedy Snake") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Snake") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 2:
-            // OLED_DisplayString((OLED_WIDTH - strlen("2048") * 6) / 2, 0, "2048");
-            OLED_DrawTitleBar("Here is 2048!");
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("2048")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Here is 2048!") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("2048") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         case 3:
-            // OLED_DisplayString((OLED_WIDTH - strlen("Back") * 6) / 2, 0, "Back");
-            OLED_DrawTitleBar("Back To Menu");
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Back")*6+ 3, 10, 100, EASE_INOUT_CIRC, true);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleSnake", (OLED_WIDTH - strlen("Greedy Snake") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Back To Menu") * 6 + 3, 8, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Back") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
             break;
         default:
             break;
         }
-
     }
-    #pragma endregion PlayerSelection
-    
-    
-    #pragma region ResetAnimation
-    if (menuRank == 1)
+#pragma endregion PlayerSelection
+
+#pragma region ResetAnimation //完成换级时候让动画复位
+    if (menuRank == 1 && OLED_GetAnimationStates(&Games_AnimationManager, "Snake") == 0)
     {
-        OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, EASE_IN_CIRC, true);
-        OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1, EASE_IN_CIRC, true);
+        OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, EASE_IN_CIRC);
+        OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1, EASE_IN_CIRC);
     }
 
-    if (!isFirstRun)
-        SystemGetsSignal();
+#pragma endregion ResetAnimation
 
-
-    isFirstRun = false;
     preMenuSelection = menuSelection;
 }
 
-
-void SystemGetsSignal() //这里是旋钮数据的获取
+void SystemGetsSignal() // 这里是旋钮数据的获取
 {
-    static bool preMutiUse = true;
     static uint16_t preCount = 32767;
     uint16_t pageCount;
     if (currentPage == UI_PAGE_MENU)
@@ -338,9 +337,9 @@ void SystemGetsSignal() //这里是旋钮数据的获取
         pageCount = GamesItemCount;
     }
 
-    if(count-preCount > 1)
+    if (count - preCount > 1)
     {
-        if(menuSelection < pageCount)
+        if (menuSelection < pageCount)
         {
             menuSelection++;
         }
@@ -351,10 +350,10 @@ void SystemGetsSignal() //这里是旋钮数据的获取
 
         preCount = count;
     }
-    else if(count-preCount < -1)
+    else if (count - preCount < -1)
     {
 
-        if(menuSelection > 1)
+        if (menuSelection > 1)
         {
             menuSelection--;
         }
@@ -368,54 +367,50 @@ void SystemGetsSignal() //这里是旋钮数据的获取
 
     if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
     {
-        HAL_Delay(100); // 防抖动延时
+        HAL_Delay(50); // 防抖动延时
         if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
         {
             if (menuRank == 1 && menuSelection == 1)
             {
                 menuRank = 2;
                 currentPage = UI_PAGE_GAMES;
-                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (2 - menuSelection), 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (3 - menuSelection), 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (4 - menuSelection), 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 1000, EASE_IN_CIRC);
 
-                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 1, 10, 1000, EASE_IN_EXPO, false);
-                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
             }
             else if (menuRank == 2 && menuSelection == 3)
             {
                 menuRank = 1;
                 menuSelection = 1;
                 currentPage = UI_PAGE_MENU;
-                
-                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * -1, 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC, false);
-                OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 1, 10, 1000, EASE_IN_EXPO, false);
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * -1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
 
-
-                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, 1000, EASE_IN_CIRC, false);
+                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
-                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, 1000, EASE_IN_CIRC, false);
-
+                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 5, 1000, EASE_IN_CIRC);
             }
-            
-
-
-
-
 
             while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
             {
@@ -423,5 +418,4 @@ void SystemGetsSignal() //这里是旋钮数据的获取
             }
         }
     }
-
 }

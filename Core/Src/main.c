@@ -124,6 +124,7 @@ int main(void)
   OLED_InitAnimationManager(&g_Title_AnimationManager); // 初始化标题动画管理器
   __HAL_TIM_SET_COUNTER(&htim3, 32767);
 
+  Snake_InitGame();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,8 +134,8 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    System_UI_Loop(); // UI循环
-    
+    // System_UI_Loop(); // UI循环
+    Snake_GameLoop();
     
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率

@@ -475,24 +475,34 @@ uint8_t OLED_GetAnimationStates(AnimationManager_t *manager, const char *tag) //
     return 0; // 如果没有找到，返回0表示非活跃
 }
 
-// 这个函数是用来移动一个对象的，tag是对象的标签，targetX和targetY是目标坐标，duration是动画持续时间，easeType是缓动类型 bool为是可以在while循环里面使用
-void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType, bool enablePrevMutiUseCalling)
+// 移动指定标签的对象到目标坐标。
+// 如果对象已在向同一目标动画且动画处于活动状态，则不执行任何操作。
+// 否则，它会中断当前动画（如果活动）并从当前位置开始新的动画。
+void OLED_DoTweenObject(AnimationManager_t *manager, const char *tag, float targetX, float targetY, uint32_t duration, EaseType_t easeType)
 {
     TaggedAnimation_t *anim = OLED_FindTaggedAnimation(manager, tag);
-    if (enablePrevMutiUseCalling)
+
+    if (anim == NULL)
     {
-        if (anim && !(anim->isActive)) // 找到了动画，而且它不是正在tween的时候
-        {
-            OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
-        }
+        // 如果找不到具有指定标签的动画对象，则不执行任何操作。
+        // 或者，您可以在此处添加创建新对象的逻辑（如果需要）。
+        // 例如: OLED_MoveObject(manager, tag, initialX, initialY, targetX, targetY, duration, easeType);
+        // 但这需要为新对象定义 initialX, initialY。
+        return;
     }
-    else
+
+    // 检查动画是否已处于活动状态并且已经朝向相同的目标
+    if (anim->isActive &&
+        anim->xAnimation.endValue == targetX &&
+        anim->yAnimation.endValue == targetY)
     {
-        if (anim && (anim->currentX != targetX || anim->currentY != targetY))
-        {
-            OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
-        }
+        // 动画已在进行中且目标相同，无需操作
+        return;
     }
+
+    // 否则，（重新）启动动画到新目标
+    // OLED_MoveObject 将从 anim->currentX, anim->currentY 开始动画
+    OLED_MoveObject(manager, tag, anim->currentX, anim->currentY, targetX, targetY, duration, easeType);
 }
 
 // 为X或Y轴单独创建动画的函数

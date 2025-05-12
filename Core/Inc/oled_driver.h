@@ -8,7 +8,9 @@
 #ifndef INC_OLED_DRIVER_H_
 #define INC_OLED_DRIVER_H_
 
+#include "games.h"
 void System_UI_Loop();
 void SystemGetsSignal(); //这里是旋钮数据的获取
+
 
 #endif /* INC_OLED_DRIVER_H_ */
