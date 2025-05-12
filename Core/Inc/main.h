@@ -65,12 +65,6 @@ extern uint16_t count; // 旋钮数据
 #define GYRO_SDA_GPIO_Port GPIOB
 #define Encoder_Input_Pin GPIO_PIN_12
 #define Encoder_Input_GPIO_Port GPIOB
-#define IPS_SCK_Pin GPIO_PIN_13
-#define IPS_SCK_GPIO_Port GPIOB
-#define IPS_MISO_Pin GPIO_PIN_14
-#define IPS_MISO_GPIO_Port GPIOB
-#define IPS_MOSI_Pin GPIO_PIN_15
-#define IPS_MOSI_GPIO_Port GPIOB
 #define Encoder_CH1_Pin GPIO_PIN_4
 #define Encoder_CH1_GPIO_Port GPIOB
 #define Encoder_CH2_Pin GPIO_PIN_5

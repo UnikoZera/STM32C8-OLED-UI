@@ -20,7 +20,6 @@
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "gpio.h"
 
@@ -100,7 +99,6 @@ int main(void)
   MX_TIM1_Init();
   MX_I2C2_Init();
   MX_TIM3_Init();
-  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
