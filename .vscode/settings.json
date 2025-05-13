@@ -25,6 +25,7 @@
         "ranges": "c",
         "variant": "c",
         "*.def": "c",
-        "oled_driver.h": "c"
+        "oled_driver.h": "c",
+        "stdbool.h": "c"
     }
 }
