@@ -1,2 +1,2 @@
-../Core/Src/oled_driver.c:54:6:System_UI_Loop	56	static
-../Core/Src/oled_driver.c:341:6:SystemGetsSignal	24	static
+../Core/Src/oled_driver.c:53:6:System_UI_Loop	56	static
+../Core/Src/oled_driver.c:413:6:SystemGetsSignal	24	static

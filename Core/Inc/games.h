@@ -8,22 +8,22 @@
 #ifndef INC_GAMES_H_
 #define INC_GAMES_H_
 
-#include <stdint.h>  // Ensure standard integer types are defined
-#include <stdbool.h> // Ensure bool type is defined
-#include "oled.h"    // Include for OLED_WIDTH, OLED_HEIGHT
+#include <stdint.h>
+#include <stdbool.h>
+#include "oled.h"
 
-// GPIO definitions for 2048 Game Inputs
-// These assume that main.h (included in games.c) will make GPIOA, GPIOB, GPIO_PIN_x known.
-#define GAME_INPUT_UP_PORT GPIOA
-#define GAME_INPUT_UP_PIN GPIO_PIN_0 // Example: PA0
-#define GAME_INPUT_DOWN_PORT GPIOA
-#define GAME_INPUT_DOWN_PIN GPIO_PIN_1 // Example: PA1
-#define GAME_INPUT_LEFT_PORT GPIOA
-#define GAME_INPUT_LEFT_PIN GPIO_PIN_2 // Example: PA2
-#define GAME_INPUT_RIGHT_PORT GPIOA
-#define GAME_INPUT_RIGHT_PIN GPIO_PIN_3 // Example: PA3
-#define GAME_INPUT_RESTART_PORT GPIOB // Matches Encoder_Input_GPIO_Port from main.h
-#define GAME_INPUT_RESTART_PIN GPIO_PIN_12 // Matches Encoder_Input_Pin from main.h
+// #define GAME_INPUT_UP_PORT GPIOA
+// #define GAME_INPUT_UP_PIN GPIO_PIN_0 // Example: PA0
+// #define GAME_INPUT_DOWN_PORT GPIOA
+// #define GAME_INPUT_DOWN_PIN GPIO_PIN_1 // Example: PA1
+// #define GAME_INPUT_LEFT_PORT GPIOA
+// #define GAME_INPUT_LEFT_PIN GPIO_PIN_2 // Example: PA2
+// #define GAME_INPUT_RIGHT_PORT GPIOA
+// #define GAME_INPUT_RIGHT_PIN GPIO_PIN_3 // Example: PA3
+#define GAME_BUTTON_PORT GPIOB
+#define GAME_BUTTON_PIN GPIO_PIN_11
+#define GAME_INPUT_RESTART_PORT GPIOB
+#define GAME_INPUT_RESTART_PIN GPIO_PIN_12
 
 #define SNAKE_MAX_LENGTH 100
 #define SNAKE_BLOCK_SIZE 4 // 每个方块的大小（像素）

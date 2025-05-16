@@ -279,6 +279,7 @@ void Game2048_Init(void)
     game2048_game_over = false;
     game2048_game_won = false;
     game2048_move_made_this_turn = false;
+    FirstRun = true; // Reset the first run flag
     Game2048_AddRandomTile();
 
     OLED_UpdateDisplayVSync(); // Update display to show the initial state
@@ -506,22 +507,22 @@ void Game2048_GameLoop(void)
         FirstRun = false;
     }
 
-    if (count - LastCount > 1 && HAL_GPIO_ReadPin(GAME_INPUT_RESTART_PORT, GAME_INPUT_RESTART_PIN) == GPIO_PIN_SET)
+    if (count - LastCount > 1 && HAL_GPIO_ReadPin(GAME_BUTTON_PORT, GAME_BUTTON_PIN) == GPIO_PIN_SET)
     {
         Game2048_HandleInput(DIR_RIGHT);
         LastCount = count;
     }
-    else if (count - LastCount < -1 && HAL_GPIO_ReadPin(GAME_INPUT_RESTART_PORT, GAME_INPUT_RESTART_PIN) == GPIO_PIN_SET)
+    else if (count - LastCount < -1 && HAL_GPIO_ReadPin(GAME_BUTTON_PORT, GAME_BUTTON_PIN) == GPIO_PIN_SET)
     {
         Game2048_HandleInput(DIR_LEFT);
         LastCount = count;
     }
-    else if (count - LastCount > 1 && HAL_GPIO_ReadPin(GAME_INPUT_RESTART_PORT, GAME_INPUT_RESTART_PIN) == GPIO_PIN_RESET)
+    else if (count - LastCount > 1 && HAL_GPIO_ReadPin(GAME_BUTTON_PORT, GAME_BUTTON_PIN) == GPIO_PIN_RESET)
     {
         Game2048_HandleInput(DIR_UP);
         LastCount = count;
     }
-    else if (count - LastCount < -1 && HAL_GPIO_ReadPin(GAME_INPUT_RESTART_PORT, GAME_INPUT_RESTART_PIN) == GPIO_PIN_RESET)
+    else if (count - LastCount < -1 && HAL_GPIO_ReadPin(GAME_BUTTON_PORT, GAME_BUTTON_PIN) == GPIO_PIN_RESET)
     {
         Game2048_HandleInput(DIR_DOWN);
         LastCount = count;

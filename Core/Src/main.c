@@ -124,7 +124,6 @@ int main(void)
   OLED_InitAnimationManager(&Status_AnimationManager); // 初始化状态动画管理器
   OLED_InitAnimationManager(&g_Title_AnimationManager); // 初始化标题动画管理器
   __HAL_TIM_SET_COUNTER(&htim3, 32767);
-  Game2048_Init(); // 初始化游戏
 
   /* USER CODE END 2 */
 
@@ -137,8 +136,6 @@ int main(void)
     
     System_UI_Loop(); // UI循环
     
-    // Game2048_GameLoop(); // 游戏循环
-
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
@@ -151,9 +148,6 @@ int main(void)
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
     OLED_SmartUpdate(); // 智能更新显示
-
-    printf("HELLO WORLD\r\n");
-
     #pragma endregion OLED_UI_SETTINGS
 
 
