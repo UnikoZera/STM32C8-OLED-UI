@@ -26,6 +26,13 @@
         "variant": "c",
         "*.def": "c",
         "oled_driver.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "video_player.h": "c",
+        "oled_optimize.h": "c",
+        "pid.h": "c",
+        "bad_apple.h": "c",
+        "stddef.h": "c",
+        "STDDEF.H": "cpp",
+        "spi.h": "c"
     }
 }

@@ -1,0 +1,8 @@
+../Core/Src/calculator.c:13:5:add	16	static
+../Core/Src/calculator.c:18:5:subtract	16	static
+../Core/Src/calculator.c:23:5:multiply	16	static
+../Core/Src/calculator.c:28:7:divide	24	static
+../Core/Src/calculator.c:40:7:square_root	16	static
+../Core/Src/calculator.c:52:8:power	24	static
+../Core/Src/calculator.c:63:7:solve_ode_euler	32	static
+../Core/Src/calculator.c:118:8:solve_double_integral_trapezoidal	120	static

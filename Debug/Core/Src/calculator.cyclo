@@ -1,0 +1,8 @@
+../Core/Src/calculator.c:13:5:add	1
+../Core/Src/calculator.c:18:5:subtract	1
+../Core/Src/calculator.c:23:5:multiply	1
+../Core/Src/calculator.c:28:7:divide	2
+../Core/Src/calculator.c:40:7:square_root	2
+../Core/Src/calculator.c:52:8:power	1
+../Core/Src/calculator.c:63:7:solve_ode_euler	7
+../Core/Src/calculator.c:118:8:solve_double_integral_trapezoidal	11

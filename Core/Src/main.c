@@ -29,9 +29,9 @@
 #include "oled.h"
 #include "oled_ui.h"
 #include "oled_driver.h"
-// #include "oled_benchmark.h"
 #include "oled_optimize.h"
 #include "pid.h"
+#include "video_player.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -134,8 +134,8 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    System_UI_Loop(); // UI循环
-    
+    // System_UI_Loop(); // UI循环
+    play_video(); // 播放视频
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
