@@ -33,6 +33,8 @@
         "bad_apple.h": "c",
         "stddef.h": "c",
         "STDDEF.H": "cpp",
-        "spi.h": "c"
+        "spi.h": "c",
+        "stm32f1xx_hal.h": "c",
+        "flash.h": "c"
     }
 }

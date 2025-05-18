@@ -32,6 +32,7 @@
 #include "oled_optimize.h"
 #include "pid.h"
 #include "video_player.h"
+#include "flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -101,6 +102,7 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  // W25Q64_Init(); // 初始化W25Q64
   OLED_Init(); // 初始化OLED
   OLED_InitBuffer(); // 初始化双缓冲
   OLED_ClearBuffer(); // 清空缓冲区
@@ -134,8 +136,8 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    // System_UI_Loop(); // UI循环
-    play_video(); // 播放视频
+    System_UI_Loop(); // UI循环
+    // play_video(); // 播放视频
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40

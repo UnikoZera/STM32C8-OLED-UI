@@ -474,7 +474,7 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
     if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET)
     {
         HAL_Delay(50); // 防抖动延时
-        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET && !gameOver)
+        if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET && !gameOver && !game2048_game_over)
         {
             if (menuRank == 1 && menuSelection == 1)
             {
@@ -554,11 +554,11 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
                 OLED_DoTweenObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, 1, EASE_IN_CUBIC);
                 OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", 0, 8, 1000, EASE_IN_CUBIC);
                 OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 0, 8, 1000, EASE_INOUT_CIRC);
-                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
-                HAL_Delay(100);
-                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
-                HAL_Delay(100);
-                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
+                OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC);
+                // HAL_Delay(100);
+                OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
+                // HAL_Delay(100);
+                OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
             }
             else if (menuRank == 3 && menuSelection == 2 && cancelSelection && UI_PAGE_GAMES && !game2048_game_over)
             {

@@ -59,6 +59,8 @@ extern uint16_t count; // 旋钮数据
 /* Private defines -----------------------------------------------------------*/
 #define SysWork_Light_Pin GPIO_PIN_13
 #define SysWork_Light_GPIO_Port GPIOC
+#define Flash_CS_Pin GPIO_PIN_7
+#define Flash_CS_GPIO_Port GPIOA
 #define Switch_Input_Pin GPIO_PIN_11
 #define Switch_Input_GPIO_Port GPIOB
 #define Encoder_Input_Pin GPIO_PIN_12
