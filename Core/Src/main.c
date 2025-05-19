@@ -98,7 +98,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
-  MX_TIM1_Init();
   MX_TIM3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
@@ -113,7 +112,7 @@ int main(void)
   
   // HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
   // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
+  // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1); // 启动编码器
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // 启动编码器
 
@@ -126,7 +125,6 @@ int main(void)
   OLED_InitAnimationManager(&Status_AnimationManager); // 初始化状态动画管理器
   OLED_InitAnimationManager(&g_Title_AnimationManager); // 初始化标题动画管理器
   __HAL_TIM_SET_COUNTER(&htim3, 32767);
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -136,8 +134,10 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    System_UI_Loop(); // UI循环
-    // play_video(); // 播放视频
+    // System_UI_Loop(); // UI循环
+    play_video(); // 播放视频
+    // uint8_t data[12]; // 分配内存
+    // W25Q64_Read(0x0000, data, 12); // 读取数据
     
     OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
@@ -149,7 +149,9 @@ int main(void)
     OLED_UpdateAnimationManager(&About_AnimationManager); // 更新关于动画管理器
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
-    OLED_SmartUpdate(); // 智能更新显示
+    // OLED_DisplayString(0, 0, data); // 显示字符串
+    // OLED_SmartUpdate(); // 智能更新显示
+    OLED_UpdateDisplayVSync(); // 垂直同步更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 

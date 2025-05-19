@@ -5,8 +5,6 @@
  *      Author: UnikoZera
  */
 
-// 确保首先包含定义基本类型和 HAL 驱动的头文件
-#include "stm32f1xx_hal.h"
 #include "flash.h"
 #include "spi.h"
 
@@ -14,7 +12,7 @@
 #define W25Q64_CS_GPIO_Port GPIOA
 #endif
 #ifndef W25Q64_CS_Pin
-#define W25Q64_CS_Pin GPIO_PIN_8
+#define W25Q64_CS_Pin GPIO_PIN_7
 #endif
 
 #define W25Q64_CS_LOW() HAL_GPIO_WritePin(W25Q64_CS_GPIO_Port, W25Q64_CS_Pin, GPIO_PIN_RESET)
@@ -42,11 +40,6 @@
 
 #define W25Q64_DUMMY_BYTE 0xA5
 #define W25Q64_TIMEOUT 1000 // SPI Timeout in ms
-
-// 外部 SPI 句柄，假设在 spi.c 中定义和初始化，并在 spi.h 中声明
-// 如果 spi.h 中没有 extern SPI_HandleTypeDef hspi2; 则需要在此处添加
-// extern SPI_HandleTypeDef hspi2;
-// 通常 CubeMX 生成的 spi.h 会包含这个 extern 声明
 
 // 内部辅助函数
 static uint8_t W25Q64_Spi_TransmitReceive(uint8_t data)
@@ -305,12 +298,13 @@ void W25Q64_Read(uint32_t ReadAddr, uint8_t *pBuffer, uint32_t NumByteToRead)
 void W25Q64_Fast_Read(uint32_t ReadAddr, uint8_t *pBuffer, uint32_t NumByteToRead)
 {
     W25Q64_CS_LOW();
-    uint8_t cmd[4];
+    uint8_t cmd[5]; // Command (1) + Address (3) + Dummy (1)
     cmd[0] = W25X_FastReadData;
     cmd[1] = (ReadAddr & 0xFF0000) >> 16;
     cmd[2] = (ReadAddr & 0x00FF00) >> 8;
     cmd[3] = (ReadAddr & 0x0000FF);
-    W25Q64_Spi_Transmit(cmd, 4);
+    cmd[4] = W25Q64_DUMMY_BYTE;  // Dummy byte
+    W25Q64_Spi_Transmit(cmd, 5); // Send command, address, and dummy byte
     W25Q64_Spi_Receive(pBuffer, NumByteToRead);
     W25Q64_CS_HIGH();
 }
@@ -319,7 +313,7 @@ void W25Q64_Fast_Read(uint32_t ReadAddr, uint8_t *pBuffer, uint32_t NumByteToRea
 // ReadAddr: 读取地址
 // pBuffer: 数据接收缓冲区
 // NumByteToRead: 读取字节数
-void W25Q64_Dual_Read(uint32_t ReadAddr, uint8_t *pBuffer, uint32_t NumByteToRead)
+void W25Q64_Dual_Read(uint32_t ReadAddr, uint8_t *pBuffer, uint32_t NumByteToRead) //!STM32F103不支持qspi！
 {
     W25Q64_CS_LOW();
     uint8_t cmd[4];

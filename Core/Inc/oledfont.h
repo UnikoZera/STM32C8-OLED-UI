@@ -99,7 +99,7 @@ const uint8_t ORIGINAL_OLED_FONT_6X8[] = {
   
 };
 
-const uint8_t FireCode_Font_6X8[] = {
+const uint8_t FiraCode_Font_6X8[] = {
     0x00,0x00,0x00,0x00,0x00,0x00, /*' ', 0 */
     0x00,0x00,0x80,0x9f,0x00,0x00, /*'!', 1 */
     0x00,0x00,0x07,0x07,0x00,0x00, /*'\"', 2 */
@@ -3963,5 +3963,3 @@ const uint8_t SongTi_Font_6X8[] = {
 };
 
 #endif
-
-
