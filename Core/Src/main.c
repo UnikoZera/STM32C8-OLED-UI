@@ -109,12 +109,14 @@ int main(void)
   OLED_EnableDiffMode(1);  // 启用差分更新
   OLED_EnableFastUpdate(1); // 启用快速更新
 
-  
+
   // HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
   // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
   // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2); // 启动PWM
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1); // 启动编码器
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // 启动编码器
+
+  video_player_init(); // 初始化视频播放器
 
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
@@ -134,12 +136,11 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    // System_UI_Loop(); // UI循环
-    play_video(); // 播放视频
-    // uint8_t data[12]; // 分配内存
-    // W25Q64_Read(0x0000, data, 12); // 读取数据
+    System_UI_Loop(); // UI循环
+    // play_video(); // 播放视频
+
     
-    OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
+    // OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器
@@ -149,9 +150,7 @@ int main(void)
     OLED_UpdateAnimationManager(&About_AnimationManager); // 更新关于动画管理器
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
-    // OLED_DisplayString(0, 0, data); // 显示字符串
-    // OLED_SmartUpdate(); // 智能更新显示
-    OLED_UpdateDisplayVSync(); // 垂直同步更新显示
+    OLED_SmartUpdate(); // 智能更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 

@@ -26,7 +26,7 @@ Core/Src/videoPlayer.o: ../Core/Src/videoPlayer.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Core/Inc/oled_optimize.h ../Core/Inc/bad_apple.h ../Core/Inc/oled.h
+ ../Core/Inc/oled_optimize.h ../Core/Inc/goodapple.h ../Core/Inc/oled.h
 ../Core/Inc/video_player.h:
 ../Core/Inc/oled.h:
 ../Core/Inc/i2c.h:
@@ -58,5 +58,5 @@ Core/Src/videoPlayer.o: ../Core/Src/videoPlayer.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Core/Inc/oled_optimize.h:
-../Core/Inc/bad_apple.h:
+../Core/Inc/goodapple.h:
 ../Core/Inc/oled.h:

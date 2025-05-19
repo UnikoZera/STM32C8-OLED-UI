@@ -71,7 +71,6 @@ void System_UI_Loop()
         OLED_MoveObject(&g_Title_AnimationManager, "Title2048", (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Here is 2048!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
 
-        OLED_MoveObject(&g_Title_AnimationManager, "Do some CAL!", (OLED_WIDTH - strlen("Do some Cal!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Do some Cal!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
         OLED_MoveObject(&g_Title_AnimationManager, "BAD APPLE!", (OLED_WIDTH - strlen("BAD APPLE!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("BAD APPLE!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
 
         OLED_MoveObject(&g_Title_AnimationManager, "Show FPS?", (OLED_WIDTH - strlen("Show FPS?") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Show FPS?") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
@@ -91,7 +90,6 @@ void System_UI_Loop()
 #pragma endregion 游戏栏
 
 #pragma region 工具栏
-        OLED_MoveObject(&Tools_AnimationManager, "Calculator", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
         OLED_MoveObject(&Tools_AnimationManager, "VideoPlayer", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
 
 #pragma endregion 工具栏
@@ -384,10 +382,6 @@ void System_UI_Loop()
         OLED_DoTweenObject(&Games_AnimationManager, "Snake", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, EASE_IN_CIRC);
         OLED_DoTweenObject(&Games_AnimationManager, "2048", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, EASE_IN_CIRC);
         OLED_DoTweenObject(&g_AnimationManager, "BackButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1, EASE_IN_CIRC);
-
-    }
-    else if (menuRank == 1 && OLED_GetAnimationStates(&Tools_AnimationManager, "Calculator") == 0)
-    {
 
     }
     else if (menuRank == 1 && OLED_GetAnimationStates(&Status_AnimationManager,  "RunningTime") == 0)

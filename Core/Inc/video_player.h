@@ -20,7 +20,11 @@ int lz77_decompress(const uint8_t* input, size_t input_size, uint8_t* output, si
 // Function to display a single frame
 void display_frame_oled(unsigned char *frame);
 
+void video_player_init(void); // Initialize the video player
 // Function to play the video
 void play_video();
+
+void video_fast_forward(int frames_to_skip); // Fast forward the video
+void video_rewind(int frames_to_skip); // Rewind the video
 
 #endif /* INC_VIDEO_PLAYER_H_ */

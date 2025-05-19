@@ -35,6 +35,7 @@
         "STDDEF.H": "cpp",
         "spi.h": "c",
         "stm32f1xx_hal.h": "c",
-        "flash.h": "c"
+        "flash.h": "c",
+        "goodapple.h": "c"
     }
 }

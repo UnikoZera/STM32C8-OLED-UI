@@ -1,3 +1,9 @@
 ../Core/Src/videoPlayer.c:16:5:lz77_decompress	11
-../Core/Src/videoPlayer.c:66:6:display_frame_oled	5
-../Core/Src/videoPlayer.c:87:6:play_video	6
+../Core/Src/videoPlayer.c:73:6:display_frame_oled	5
+../Core/Src/videoPlayer.c:94:6:video_player_init	1
+../Core/Src/videoPlayer.c:102:6:play_video	5
+../Core/Src/videoPlayer.c:147:6:video_fast_forward	4
+../Core/Src/videoPlayer.c:162:6:video_rewind	3
+../Core/Src/videoPlayer.c:173:5:get_current_frame_index	1
+../Core/Src/videoPlayer.c:178:14:get_total_frames	2
+../Core/Src/videoPlayer.c:185:6:set_current_frame_index	5
