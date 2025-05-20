@@ -136,8 +136,8 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    System_UI_Loop(); // UI循环
-    // play_video(); // 播放视频
+    // System_UI_Loop(); // UI循环
+    play_video(); // 播放视频
 
     
     // OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
@@ -151,6 +151,7 @@ int main(void)
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
     OLED_SmartUpdate(); // 智能更新显示
+    // OLED_UpdateDisplayVSync(); // 使用DMA更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 

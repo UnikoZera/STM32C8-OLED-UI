@@ -27,4 +27,8 @@ void play_video();
 void video_fast_forward(int frames_to_skip); // Fast forward the video
 void video_rewind(int frames_to_skip); // Rewind the video
 
+void set_current_frame_index(int frame_index);
+
+int get_target_frame_index(unsigned int index, uint8_t *dst, size_t output_size); // Get the target frame index - Updated signature
+
 #endif /* INC_VIDEO_PLAYER_H_ */
