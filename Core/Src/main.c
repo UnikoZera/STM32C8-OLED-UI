@@ -139,7 +139,8 @@ int main(void)
     
     System_UI_Loop(); // UI循环
 
-    // OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
+    if (isShowFPS)
+      OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
     OLED_UpdateAnimationManager(&g_AnimationManager); // 更新动画管理器

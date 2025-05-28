@@ -16,7 +16,7 @@
 #include "video_player.h"
 
 extern OLED_Cube3D CUBE;
-
+extern bool isShowFPS;
 void System_UI_Loop();
 void SystemGetsSignal(); //这里是旋钮数据的获取
 
