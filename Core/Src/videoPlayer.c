@@ -15,6 +15,7 @@
 #include <stddef.h>
 
 #define Video_Basic_Addr 0x00000000 // Base address for video data
+bool video_first_play;
 
 int lz77_decompress(const uint8_t *input, size_t input_size, uint8_t *output, size_t output_size)
 {
@@ -43,19 +44,19 @@ int lz77_decompress(const uint8_t *input, size_t input_size, uint8_t *output, si
             // Back reference
             if (input + 2 > input_end)
             {
-                return -1; // Input overflow
+                return -2; // Input overflow
             }
             uint16_t offset = ((flag & 0x7F) << 8) | *input++;
             offset += 1; // Offset starts from 1
             uint8_t length = *input++;
             if (length == 0 || offset > (size_t)(output_ptr - output))
             {
-                return -1; // Invalid length or offset
+                return -3; // Invalid length or offset
             }
             uint8_t *src = output_ptr - offset;
             if (output_ptr + length > output_end)
             {
-                return -1; // Output overflow
+                return -4; // Output overflow
             }
             for (uint8_t i = 0; i < length; i++)
             {
@@ -87,10 +88,6 @@ void display_frame_oled(unsigned char *frame)
             OLED_WritePixel(x, y, pixel ? 1 : 0); // Draw pixel (1 for white, 0 for black)
         }
     }
-
-    // 退出视频播放状态在这里！
-    /*code here*/
-
     // OLED_SmartUpdate();
 }
 
@@ -102,6 +99,17 @@ void video_player_init()
 
 void play_video()
 {
+    static uint16_t LastCount_video = 0;
+
+
+    if (video_first_play)
+    {
+        video_first_play = false;
+        LastCount_video = count; // Initialize LastCount_video
+        video_player_init();
+    }
+
+
     unsigned char frame_buffer[920]; // Buffer for one decompressed frame (114*64/8 = 912, rounded up)
 
     if (total_frames == 0)
@@ -119,6 +127,21 @@ void play_video()
     display_frame_oled(frame_buffer);
 
     current_frame_index++;
+
+    if(count - LastCount_video >= 2)
+    {
+        video_fast_forward(10);
+        LastCount_video = count;
+    }
+    else if (count - LastCount_video <= -2)
+    {
+        video_rewind(10);
+        LastCount_video = count;
+    }
+  
+
+    // 退出视频播放状态在这里！
+    /*code here*/
 }
 
 void video_fast_forward(int frames_to_skip)

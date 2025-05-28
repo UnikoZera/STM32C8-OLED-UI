@@ -116,8 +116,6 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_1); // 启动编码器
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_2); // 启动编码器
 
-  video_player_init(); // 初始化视频播放器
-
   OLED_InitAnimationManager(&g_AnimationManager); // 初始化动画管理器
   OLED_InitAnimationManager(&Menu_AnimationManager); // 初始化菜单动画管理器
   OLED_InitAnimationManager(&Games_AnimationManager); // 初始化游戏动画管理器
@@ -136,8 +134,7 @@ int main(void)
     #pragma region OLED_UI_SETTINGS // UI设置
     OLED_ClearBuffer();
     
-    // System_UI_Loop(); // UI循环
-    play_video(); // 播放视频
+    System_UI_Loop(); // UI循环
 
     
     // OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
@@ -150,8 +147,7 @@ int main(void)
     OLED_UpdateAnimationManager(&About_AnimationManager); // 更新关于动画管理器
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
-    // OLED_SmartUpdate(); // 智能更新显示
-    OLED_UpdateDisplayVSync(); // 使用DMA更新显示
+    OLED_SmartUpdate(); // 智能更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 

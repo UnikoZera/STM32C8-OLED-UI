@@ -31,4 +31,5 @@ void set_current_frame_index(int frame_index);
 
 int get_target_frame_index(unsigned int index, uint8_t *dst, size_t output_size); // Get the target frame index - Updated signature
 
+extern bool video_first_play; // Flag to check if it's the first play
 #endif /* INC_VIDEO_PLAYER_H_ */
