@@ -46,4 +46,3 @@
 ../Core/Src/oled_ui.c:598:6:OLED_DrawProgressBar	40	static
 ../Core/Src/oled_ui.c:616:6:OLED_DrawRectangle	40	static
 ../Core/Src/oled_ui.c:705:6:OLED_DrawFilledRectangle	40	static
-../Core/Src/oled_ui.c:782:6:OLED_DrawLine	48	static

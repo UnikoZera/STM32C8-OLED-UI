@@ -6,10 +6,9 @@
  */
 
 #include "oled_driver.h"
-#include "oled_ui.h"
-#include "main.h"
-#include "oled.h"
-#include "video_player.h"
+
+
+OLED_Cube3D CUBE;
 
 // UI 常量定义
 #define UI_MAX_PAGES 5      // 最大页面数
@@ -101,6 +100,7 @@ void System_UI_Loop()
 #pragma region 状态栏 //这里我想做成一个界面就好,不要选项
         OLED_MoveObject(&Status_AnimationManager, "RunningTime", 0, -10, 0, -10, 1, TweenStyle);
         OLED_MoveObject(&Status_AnimationManager, "Status", 0, OLED_HEIGHT, 0, OLED_HEIGHT, 1, TweenStyle);
+        OLED_MoveObject(&Status_AnimationManager, "CUBE", 150, 10, 150, 10, 1, TweenStyle);
 #pragma endregion 状态栏
 
 #pragma region 设置栏
@@ -225,6 +225,11 @@ void System_UI_Loop()
     OLED_DisplayString(x, y + 9, "Core: Cortex-M3");
     OLED_DisplayString(x, y + 18, "CrystalOS v1.0");
     OLED_DisplayString(x, y + 27, "UnikoZera Made");
+    OLED_GetObjectPosition(&Status_AnimationManager, "CUBE", &x, &y);
+    CUBE.transform.center_x = x;
+    CUBE.transform.center_y = y;
+    OLED_UpdateCubeRotation(&CUBE, 0.02f, 0.03f, 0.01f); // X,Y,Z轴旋转增量
+    OLED_DrawCube3D(&CUBE);
 
 
     OLED_GetObjectPosition(&About_AnimationManager, "Developer", &x, &y);
@@ -437,6 +442,8 @@ void System_UI_Loop()
 
         OLED_DoTweenObject(&Status_AnimationManager, "RunningTime", OLED_UI_END_X, 1, 500, EASE_IN_CIRC);
         OLED_DoTweenObject(&Status_AnimationManager, "Status", 0, OLED_UI_START_Y + OLED_UI_GAP_Y * 1 + 6, 500, EASE_IN_EXPO);
+
+        OLED_DoTweenObject(&Status_AnimationManager, "CUBE", 113, 10, 500, EASE_IN_CIRC);
     }
     
     
@@ -783,13 +790,14 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
                 menuRank = 1;
                 menuSelection = 3;
                 currentPage = UI_PAGE_MENU;
+
                 OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Status") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
 
                 OLED_DoTweenObject(&Status_AnimationManager, "RunningTime", 0, -10, 500, EASE_IN_CIRC);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Status_AnimationManager, "Status", 0, OLED_HEIGHT, 500, EASE_IN_CIRC);
 
-
+                OLED_DoTweenObject(&Status_AnimationManager, "CUBE", 150, 10, 1000, EASE_IN_CIRC);
                 OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * -1, 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC);

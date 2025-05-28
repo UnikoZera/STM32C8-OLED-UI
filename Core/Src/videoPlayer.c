@@ -138,10 +138,6 @@ void play_video()
         video_rewind(10);
         LastCount_video = count;
     }
-  
-
-    // 退出视频播放状态在这里！
-    /*code here*/
 }
 
 void video_fast_forward(int frames_to_skip)

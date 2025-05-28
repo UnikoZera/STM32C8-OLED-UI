@@ -36,6 +36,8 @@
         "spi.h": "c",
         "stm32f1xx_hal.h": "c",
         "flash.h": "c",
-        "goodapple.h": "c"
+        "goodapple.h": "c",
+        "drawer.h": "c",
+        "games.h": "c"
     }
 }

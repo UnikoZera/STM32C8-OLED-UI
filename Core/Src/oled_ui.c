@@ -778,38 +778,38 @@ void OLED_DrawFilledRectangle(int16_t x, int16_t y, uint8_t width, uint8_t heigh
     }
 }
 
-// 绘制线段 (Bresenham算法)
-void OLED_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2) //! UPDATEDISPLAY REQUIRED
-{
-    int dx = abs(x2 - x1);
-    int dy = -abs(y2 - y1);
-    int sx = x1 < x2 ? 1 : -1;
-    int sy = y1 < y2 ? 1 : -1;
-    int err = dx + dy;
-    int e2;
+// // 绘制线段 (Bresenham算法)
+// void OLED_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2) //! UPDATEDISPLAY REQUIRED
+// {
+//     int dx = abs(x2 - x1);
+//     int dy = -abs(y2 - y1);
+//     int sx = x1 < x2 ? 1 : -1;
+//     int sy = y1 < y2 ? 1 : -1;
+//     int err = dx + dy;
+//     int e2;
 
-    while (1)
-    {
-        OLED_WritePixel(x1, y1, 1);
+//     while (1)
+//     {
+//         OLED_WritePixel(x1, y1, 1);
 
-        if (x1 == x2 && y1 == y2)
-            break;
+//         if (x1 == x2 && y1 == y2)
+//             break;
 
-        e2 = 2 * err;
-        if (e2 >= dy)
-        {
-            if (x1 == x2)
-                break;
-            err += dy;
-            x1 += sx;
-        }
-        if (e2 <= dx)
-        {
-            if (y1 == y2)
-                break;
-            err += dx;
-            y1 += sy;
-        }
-    }
-}
+//         e2 = 2 * err;
+//         if (e2 >= dy)
+//         {
+//             if (x1 == x2)
+//                 break;
+//             err += dy;
+//             x1 += sx;
+//         }
+//         if (e2 <= dx)
+//         {
+//             if (y1 == y2)
+//                 break;
+//             err += dx;
+//             y1 += sy;
+//         }
+//     }
+// }
 #pragma endregion OLED_EPICFUL_UI

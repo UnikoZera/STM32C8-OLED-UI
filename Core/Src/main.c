@@ -33,6 +33,8 @@
 #include "pid.h"
 #include "video_player.h"
 #include "flash.h"
+#include "games.h"
+#include "drawer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +110,7 @@ int main(void)
   
   OLED_EnableDiffMode(1);  // 启用差分更新
   OLED_EnableFastUpdate(1); // 启用快速更新
+  OLED_InitCube3D(&CUBE, 13.5f, 150, 10); //中心(113,10)
 
 
   // HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3); // 启动PWM
@@ -136,7 +139,6 @@ int main(void)
     
     System_UI_Loop(); // UI循环
 
-    
     // OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40
     OLED_UpdateAnimationManager(&Menu_AnimationManager); // 更新菜单动画管理器
@@ -148,6 +150,8 @@ int main(void)
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
     OLED_SmartUpdate(); // 智能更新显示
+
+    // OLED_UpdateDisplayVSync(); // 更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 
