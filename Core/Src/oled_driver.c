@@ -99,11 +99,8 @@ void System_UI_Loop()
 #pragma endregion 工具栏
 
 #pragma region 状态栏 //这里我想做成一个界面就好,不要选项
-        OLED_MoveObject(&Status_AnimationManager, "RunningTime", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
-        OLED_MoveObject(&Status_AnimationManager, "Status", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
-        OLED_MoveObject(&Status_AnimationManager, "UserManul", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
-        OLED_MoveObject(&Status_AnimationManager, "ExitMessage", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 4, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
-
+        OLED_MoveObject(&Status_AnimationManager, "RunningTime", 0, -10, 0, -10, 1, TweenStyle);
+        OLED_MoveObject(&Status_AnimationManager, "Status", 0, OLED_HEIGHT, 0, OLED_HEIGHT, 1, TweenStyle);
 #pragma endregion 状态栏
 
 #pragma region 设置栏
@@ -218,6 +215,17 @@ void System_UI_Loop()
 
     OLED_GetObjectPosition(&Tools_AnimationManager, "VideoPlayer", &x, &y);
     OLED_DisplayString(x, y, "Video");
+
+    OLED_GetObjectPosition(&Status_AnimationManager, "RunningTime", &x, &y);
+    unsigned char Timer[] = "00:00:00";
+    sprintf(Timer, "%02d:%02d:%02d", (HAL_GetTick() / 3600000) % 24, (HAL_GetTick() / 60000) % 60, (HAL_GetTick() / 1000) % 60);
+    OLED_DisplayString(x, y, Timer);
+    OLED_GetObjectPosition(&Status_AnimationManager, "Status", &x, &y);
+    OLED_DisplayString(x, y, "MCU:STM32F103C8T6");
+    OLED_DisplayString(x, y + 9, "Core: Cortex-M3");
+    OLED_DisplayString(x, y + 18, "CrystalOS v1.0");
+    OLED_DisplayString(x, y + 27, "UnikoZera Made");
+
 
     OLED_GetObjectPosition(&About_AnimationManager, "Developer", &x, &y);
     OLED_DisplayString(x, y, "Developer");
@@ -422,6 +430,15 @@ void System_UI_Loop()
         cancelSelection = true;
         play_video();
     }
+    else if (menuRank == 2 && currentPage == UI_PAGE_STATUS)
+    {
+        OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", 0, 8, 500, EASE_IN_CUBIC);
+        OLED_DoTweenObject(&g_AnimationManager, "CursorScale", 0, 8, 500, EASE_INOUT_CIRC);
+
+        OLED_DoTweenObject(&Status_AnimationManager, "RunningTime", OLED_UI_END_X, 1, 500, EASE_IN_CIRC);
+        OLED_DoTweenObject(&Status_AnimationManager, "Status", 0, OLED_UI_START_Y + OLED_UI_GAP_Y * 1 + 6, 500, EASE_IN_EXPO);
+    }
+    
     
     
 #pragma endregion PlayerSelection
@@ -743,6 +760,45 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
                 OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (5 - menuSelection), 1000, EASE_IN_CIRC);
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), 1000, EASE_IN_CIRC);
+                resetAnimation = true;
+            }
+            else if (menuRank == 1 && menuSelection == 3)
+            {
+                menuRank = 2;
+                menuSelection = 3;
+                currentPage = UI_PAGE_STATUS;
+                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Machine States") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
+                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * -1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
+            }
+            else if (menuRank == 2 && currentPage == UI_PAGE_STATUS)
+            {
+                menuRank = 1;
+                menuSelection = 3;
+                currentPage = UI_PAGE_MENU;
+                OLED_DoTweenObject(&g_Title_AnimationManager, "TitleStatus", (OLED_WIDTH - strlen("Status") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+
+                OLED_DoTweenObject(&Status_AnimationManager, "RunningTime", 0, -10, 500, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Status_AnimationManager, "Status", 0, OLED_HEIGHT, 500, EASE_IN_CIRC);
+
+
+                OLED_DoTweenObject(&Menu_AnimationManager, "GamesButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * -1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "ToolsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 0, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "StatusButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "SettingsButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1000, EASE_IN_CIRC);
+                HAL_Delay(100);
+                OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1000, EASE_IN_CIRC);
                 resetAnimation = true;
             }
             
