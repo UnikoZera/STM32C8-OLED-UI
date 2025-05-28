@@ -2,9 +2,9 @@
 ../Core/Src/videoPlayer.c:76:6:display_frame_oled	32	static
 ../Core/Src/videoPlayer.c:97:6:video_player_init	8	static
 ../Core/Src/videoPlayer.c:106:6:play_video	936	static
-../Core/Src/videoPlayer.c:135:6:video_fast_forward	16	static
-../Core/Src/videoPlayer.c:150:6:video_rewind	16	static
-../Core/Src/videoPlayer.c:165:5:get_current_frame_index	4	static
-../Core/Src/videoPlayer.c:170:14:get_total_frames	8	static
-../Core/Src/videoPlayer.c:177:6:set_current_frame_index	16	static
-../Core/Src/videoPlayer.c:195:5:get_target_frame_index	960	static
+../Core/Src/videoPlayer.c:137:6:video_fast_forward	16	static
+../Core/Src/videoPlayer.c:152:6:video_rewind	16	static
+../Core/Src/videoPlayer.c:167:5:get_current_frame_index	4	static
+../Core/Src/videoPlayer.c:172:14:get_total_frames	8	static
+../Core/Src/videoPlayer.c:179:6:set_current_frame_index	16	static
+../Core/Src/videoPlayer.c:197:5:get_target_frame_index	968	static

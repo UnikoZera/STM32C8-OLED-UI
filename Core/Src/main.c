@@ -150,8 +150,8 @@ int main(void)
     OLED_UpdateAnimationManager(&About_AnimationManager); // 更新关于动画管理器
     OLED_UpdateAnimationManager(&Status_AnimationManager); // 更新状态动画管理器
     OLED_UpdateAnimationManager(&g_Title_AnimationManager); // 更新标题动画管理器
-    OLED_SmartUpdate(); // 智能更新显示
-    // OLED_UpdateDisplayVSync(); // 使用DMA更新显示
+    // OLED_SmartUpdate(); // 智能更新显示
+    OLED_UpdateDisplayVSync(); // 使用DMA更新显示
     #pragma endregion OLED_UI_SETTINGS
 
 
