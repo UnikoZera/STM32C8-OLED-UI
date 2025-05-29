@@ -51,7 +51,7 @@ unsigned char brightness = 207; // 亮度 0 - 255
 
 //开始动画部分
 #define StartTweenTime 2000
-#define TweenStyle EASE_INOUT_ELASTIC
+#define TweenStyle EASE_INOUT_BACK
 
 //翻页部分
 #define PAGE_TWEEN_TIME 300
@@ -102,9 +102,9 @@ void System_UI_Loop()
 
         OLED_MoveObject(&g_Title_AnimationManager, "Show FPS?", (OLED_WIDTH - strlen("Show FPS?") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Show FPS?") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
 
-        OLED_MoveObject(&g_Title_AnimationManager, "UnikoZera!", (OLED_WIDTH - strlen("UnikoZera!") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("UnikoZera!") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        OLED_MoveObject(&g_Title_AnimationManager, "https://github.com/UnikoZera", (OLED_WIDTH - strlen("https://github.com/UnikoZera") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("https://github.com/UnikoZera") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
-        OLED_MoveObject(&g_Title_AnimationManager, "https://space.bilibili.com/3546696818624992", (OLED_WIDTH - strlen("https://space.bilibili.com/3546696818624992") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("https://space.bilibili.com/3546696818624992") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_Title_AnimationManager, "TitleGithub", (OLED_WIDTH - strlen("Github Adress") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("Github Adress") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&g_Title_AnimationManager, "TitleDonate", (OLED_WIDTH - strlen("BiliBili Space") * 6), OLED_TITLE_Start_Y, (OLED_WIDTH - strlen("TitleDonate") * 6), OLED_TITLE_Start_Y, StartTweenTime, TweenStyle);
 #pragma endregion 标题栏
 
 #pragma region 游戏栏
@@ -232,8 +232,14 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "BAD APPLE!");
     OLED_GetObjectPosition(&g_Title_AnimationManager, "Show FPS?", &x, &y);
     OLED_DisplayString(x, y, "Show FPS?");
-    OLED_GetObjectPosition(&g_Title_AnimationManager, "UnikoZera!", &x, &y);    
-    OLED_DisplayString(x, y, "UnikoZera!");
+
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleDeveloper", &x, &y);    
+    OLED_DisplayString(x, y, "Developer: UnikoZera");
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleGithub", &x, &y);
+    OLED_DisplayString(x, y, "GH Address");
+    OLED_GetObjectPosition(&g_Title_AnimationManager, "TitleDonate", &x, &y);
+    OLED_DisplayString(x, y, "BiliBili Space");
+
     OLED_GetObjectPosition(&Tools_AnimationManager, "VideoPlayer", &x, &y);
     OLED_DisplayString(x, y, "Video");
     OLED_GetObjectPosition(&Status_AnimationManager, "RunningTime", &x, &y);
@@ -348,31 +354,53 @@ void System_UI_Loop()
         switch (menuSelection)
         {
         case 1:
-            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "UnikoZera!", (OLED_WIDTH - strlen("UnikoZera!") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "https://github.com/UnikoZera", (OLED_WIDTH - strlen("https://github.com/UnikoZera") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "https://space.bilibili.com/3546696818624992", (OLED_WIDTH - strlen("https://space.bilibili.com/3546696818624992") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("UnikoZera!") * 6 + 3, 8, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Developer") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleAbout", (OLED_WIDTH - strlen("Developer!") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_End_Y, TITLE_TWEEN_IN_TIME, TITLE_TWEEN_IN_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGithub", (OLED_WIDTH - strlen("GH Address") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDonate", (OLED_WIDTH - strlen("BiliBili Space") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("DEVELOPER: UnikoZera") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Developer") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
             break;
         case 2:
-            OLED_DoTweenObject(&g_Title_AnimationManager, "UnikoZera!", (OLED_WIDTH - strlen("UnikoZera!") * 6), OLED_UI_START_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "https://github.com/UnikoZera", (OLED_WIDTH - strlen("https://github.com/UnikoZera") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "https://space.bilibili.com/3546696818624992", (OLED_WIDTH - strlen("https://space.bilibili.com/3546696818624992") * 6), OLED_TITLE_Start_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGithub", (OLED_WIDTH - strlen("GH Address") * 6), OLED_TITLE_End_Y, TITLE_TWEEN_IN_TIME, TITLE_TWEEN_IN_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDonate", (OLED_WIDTH - strlen("BiliBili Space") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("GH Address") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Github") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
             break;
         case 3:
-            /* code */
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGithub", (OLED_WIDTH - strlen("GH Address") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDonate", (OLED_WIDTH - strlen("BiliBili Space") * 6), OLED_TITLE_End_Y, TITLE_TWEEN_IN_TIME, TITLE_TWEEN_IN_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("BiliBili Space") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Donate") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
             break;
         case 4:
-            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_End_Y, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Back To Menu") * 6 + 3, 8, 500, EASE_IN_CUBIC);
-            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Back") * 6 + 3, 10, 100, EASE_INOUT_CIRC);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleGithub", (OLED_WIDTH - strlen("GH Address") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDonate", (OLED_WIDTH - strlen("BiliBili Space") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_End_Y, TITLE_TWEEN_IN_TIME, TITLE_TWEEN_IN_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Back To Menu") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
+            OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Back") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
             break;
         default:
             break;
         }
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 1)
+    {
+
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 2)
+    {
+
+    }
+    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 3)
+    {
+
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_TOOLS)
     {
