@@ -27,7 +27,7 @@ Core/Src/games.o: ../Core/Src/games.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Core/Inc/games.h ../Core/Inc/oled.h ../Core/Inc/i2c.h \
  ../Core/Inc/main.h ../Core/Inc/oled_optimize.h ../Core/Inc/oled.h \
- ../Core/Inc/oled_ui.h
+ ../Core/Inc/oled_ui.h ../Core/Inc/icon.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -62,3 +62,4 @@ Core/Src/games.o: ../Core/Src/games.c ../Core/Inc/main.h \
 ../Core/Inc/oled_optimize.h:
 ../Core/Inc/oled.h:
 ../Core/Inc/oled_ui.h:
+../Core/Inc/icon.h:

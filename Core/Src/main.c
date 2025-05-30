@@ -138,7 +138,6 @@ int main(void)
     OLED_ClearBuffer();
     
     System_UI_Loop(); // UI循环
-
     if (isShowFPS)
       OLED_OptimizedDisplayFPS(80, 56); // 显示帧率
     count = __HAL_TIM_GET_COUNTER(&htim3); // 获取编码器计数值 1圈40

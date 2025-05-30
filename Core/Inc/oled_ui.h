@@ -10,6 +10,7 @@
 #define MAX_ANIMATIONS 20 // Manager的最大动画数量(包含X、Y轴同时移动)
 
 #include "oled.h"
+#include "icon.h"
 #include <stdint.h>
 #include <stdbool.h>
 typedef enum
@@ -113,6 +114,7 @@ void OLED_DrawRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height);
 void OLED_DrawFilledRectangle(int16_t x, int16_t y, uint8_t width, uint8_t height, uint8_t color);
 void OLED_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 void OLED_InvertArea(int16_t x, int16_t y, uint8_t width, uint8_t height);
+void OLED_DrawIcon(int16_t x, int16_t y, IconType_t iconType);
 
 #pragma endregion funcs
 

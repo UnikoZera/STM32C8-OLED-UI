@@ -10,6 +10,7 @@
 
 #include "games.h"
 #include "oled_ui.h"
+#include "icon.h"
 #include "oled.h"
 #include "drawer.h"
 #include "main.h"
