@@ -7,8 +7,8 @@
 
 #include "main.h" // Include main.h for HAL types like uint32_t
 #include "stdint.h"
-
 #include "oled_ui.h"
+
 #pragma region TWEENS // 动画缓动函数全部在这里定义
 
 static float EaseLinear(float t)
@@ -838,6 +838,9 @@ void OLED_DrawIcon(int16_t x, int16_t y, IconType_t iconType) //! UPDATEDISPLAY 
         break;
     case ICON_ABOUT:
         iconData = IMG_ABOUT_DATA;
+        break;
+    case ICON_DEVELOPER:
+        iconData = IMG_DEVELOPER_DATA;
         break;
     default:
         return; // 无效的图标类型，直接返回

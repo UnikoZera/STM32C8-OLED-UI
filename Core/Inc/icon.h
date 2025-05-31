@@ -15,6 +15,7 @@ extern unsigned char IMG_TOOL_DATA[180];
 extern unsigned char IMG_STATUS_DATA[180];
 extern unsigned char IMG_SETTINGS_DATA[180];
 extern unsigned char IMG_ABOUT_DATA[180];
+extern unsigned char IMG_DEVELOPER_DATA[180];
 
 
 typedef enum
@@ -24,6 +25,7 @@ typedef enum
     ICON_STATUS,
     ICON_SETTINGS,
     ICON_ABOUT,
+    ICON_DEVELOPER,
 } IconType_t;
 
 #endif /* INC_ICON_H_ */

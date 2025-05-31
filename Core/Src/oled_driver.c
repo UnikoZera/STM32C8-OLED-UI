@@ -63,14 +63,14 @@ unsigned char brightness = 207; // 亮度 0 - 255
 #define TweenStyle EASE_INOUT_BACK
 
 //翻页部分
-#define PAGE_TWEEN_TIME 300
+#define PAGE_TWEEN_TIME 200
 #define PAGE_TWEEN_STYLE EASE_INOUT_QUAD
 
 //基本动画部分
 #define BASIC_TWEEN_IN_TIME 800 //包含换级部分的选项进入
 #define BASIC_TWEEN_IN_STYLE EASE_INOUT_SINE
-#define BASIC_TWEEN_OUT_TIME 800 //包含换级部分的选项退出
-#define BASIC_TWEEN_OUT_STYLE EASE_INOUT_SINE
+#define BASIC_TWEEN_OUT_TIME 1000 //包含换级部分的选项退出
+#define BASIC_TWEEN_OUT_STYLE EASE_IN_QUAD
 
 //标题动画部分
 #define TITLE_TWEEN_IN_TIME 400
@@ -143,6 +143,14 @@ void System_UI_Loop()
         OLED_MoveObject(&About_AnimationManager, "Developer", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
         OLED_MoveObject(&About_AnimationManager, "Github", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
         OLED_MoveObject(&About_AnimationManager, "Donate", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 3, 1, TweenStyle);
+
+        OLED_MoveObject(&About_AnimationManager, "GH Adress", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 1, 1, TweenStyle);
+        OLED_MoveObject(&About_AnimationManager, "BiliBili Space", OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, OLED_UI_START_X, OLED_UI_START_Y + OLED_UI_GAP_Y * 2, 1, TweenStyle);
+
+        OLED_MoveObject(&About_AnimationManager, "IconDeveloper", OLED_ICON_START_X, OLED_ICON_START_Y, OLED_ICON_START_X, OLED_ICON_START_Y, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&About_AnimationManager, "_GHA", 3, OLED_HEIGHT, 3, OLED_HEIGHT, StartTweenTime, TweenStyle);
+        OLED_MoveObject(&About_AnimationManager, "DetailDonate", 5, OLED_HEIGHT, 5, OLED_HEIGHT, StartTweenTime, TweenStyle);
+
 #pragma endregion 关于栏
 
 #pragma region 主菜单动画
@@ -219,6 +227,8 @@ void System_UI_Loop()
     OLED_DrawIcon(x, y, ICON_SETTINGS);
     OLED_GetObjectPosition(&Menu_AnimationManager, "IconAbout", &x, &y);
     OLED_DrawIcon(x, y, ICON_ABOUT);
+    OLED_GetObjectPosition(&About_AnimationManager, "IconDeveloper", &x, &y);
+    OLED_DrawIcon(x, y, ICON_DEVELOPER);
 
     OLED_GetObjectPosition(&Menu_AnimationManager, "SettingsButton", &x, &y);
     OLED_DisplayString(x, y, "Settings");
@@ -306,6 +316,13 @@ void System_UI_Loop()
     OLED_DisplayString(x, y, "Github");
     OLED_GetObjectPosition(&About_AnimationManager, "Donate", &x, &y);
     OLED_DisplayString(x, y, "Donate");
+
+    OLED_GetObjectPosition(&About_AnimationManager, "_GHA", &x, &y);
+    OLED_DisplayString(x, y, "Github.com/UnikoZera");
+    OLED_InvertArea(x, y, strlen("Github.com/UnikoZera") * 6, 10);
+    OLED_GetObjectPosition(&About_AnimationManager, "DetailDonate", &x, &y);
+    OLED_DisplayString(x, y, "ID:3546696818624992");
+    OLED_InvertArea(x, y, strlen("ID:3546696818624992") * 6, 10);
 
     OLED_GetObjectPosition(&g_AnimationManager, "TitleBGScale", &x, &y);
     OLED_InvertArea(OLED_WIDTH - x, 0, x, y);
@@ -416,6 +433,10 @@ void System_UI_Loop()
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("DEVELOPER: UnikoZera") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Developer") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
+
+            OLED_DoTweenObject(&About_AnimationManager, "IconDeveloper", OLED_ICON_END_X, OLED_ICON_END_Y, OLED_ICON_TWEEN_IN_TIME, OLED_ICON_TWEEN_IN_STYLE);
+            OLED_DoTweenObject(&About_AnimationManager, "_GHA", 3, OLED_HEIGHT, 300, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&About_AnimationManager, "DetailDonate", 5, OLED_HEIGHT, 300, EASE_IN_CUBIC);
             break;
         case 2:
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
@@ -424,6 +445,10 @@ void System_UI_Loop()
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("GH Address") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Github") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
+
+            OLED_DoTweenObject(&About_AnimationManager, "IconDeveloper", OLED_ICON_START_X, OLED_ICON_START_Y, OLED_ICON_TWEEN_OUT_TIME, OLED_ICON_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&About_AnimationManager, "_GHA", 3 , OLED_HEIGHT - 10, 300, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&About_AnimationManager, "DetailDonate", 5, OLED_HEIGHT, 300, EASE_IN_CUBIC);
             break;
         case 3:
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
@@ -432,6 +457,10 @@ void System_UI_Loop()
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("BiliBili Space") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Donate") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
+
+            OLED_DoTweenObject(&About_AnimationManager, "IconDeveloper", OLED_ICON_START_X, OLED_ICON_START_Y, OLED_ICON_TWEEN_OUT_TIME, OLED_ICON_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&About_AnimationManager, "_GHA", 3, OLED_HEIGHT, 300, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&About_AnimationManager, "DetailDonate", 5, OLED_HEIGHT - 10, 300, EASE_IN_CUBIC);            
             break;
         case 4:
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleDeveloper", (OLED_WIDTH - strlen("DEVELOPER: UnikoZera") * 6), OLED_TITLE_Start_Y, TITLE_TWEEN_OUT_TIME, TITLE_TWEEN_OUT_STYLE);
@@ -440,22 +469,14 @@ void System_UI_Loop()
             OLED_DoTweenObject(&g_Title_AnimationManager, "TitleBack", (OLED_WIDTH - strlen("Back To Menu") * 6), OLED_TITLE_End_Y, TITLE_TWEEN_IN_TIME, TITLE_TWEEN_IN_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "TitleBGScale", strlen("Back To Menu") * 6 + 3, 8, TITLE_BG_TWEEN_TIME, TITLE_BG_TWEEN_STYLE);
             OLED_DoTweenObject(&g_AnimationManager, "CursorScale", strlen("Back") * 6 + 3, 10, CURSORBG_TWEEN_TIME, CURSORBG_TWEEN_STYLE);
+
+            OLED_DoTweenObject(&About_AnimationManager, "IconDeveloper", OLED_ICON_START_X, OLED_ICON_START_Y, OLED_ICON_TWEEN_OUT_TIME, OLED_ICON_TWEEN_OUT_STYLE);
+            OLED_DoTweenObject(&About_AnimationManager, "_GHA", 3, OLED_HEIGHT, 300, EASE_IN_CUBIC);
+            OLED_DoTweenObject(&About_AnimationManager, "DetailDonate", 5, OLED_HEIGHT, 300, EASE_IN_CUBIC);
             break;
         default:
             break;
         }
-    }
-    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 1)
-    {
-
-    }
-    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 2)
-    {
-
-    }
-    else if (menuRank == 3 && currentPage == UI_PAGE_ABOUT && menuSelection == 3)
-    {
-
     }
     else if (menuRank == 2 && currentPage == UI_PAGE_TOOLS)
     {
@@ -849,18 +870,6 @@ void SystemGetsSignal() // 这里是旋钮数据的获取
                 HAL_Delay(100);
                 OLED_DoTweenObject(&Menu_AnimationManager, "AboutButton", OLED_UI_END_X, OLED_UI_START_Y + OLED_UI_GAP_Y * (6 - menuSelection), BASIC_TWEEN_IN_TIME, BASIC_TWEEN_IN_STYLE);
                 resetAnimation = true;
-            }
-            else if (menuRank == 2 && menuSelection == 1 && currentPage == UI_PAGE_ABOUT)
-            {
-                /* code */
-            }
-            else if (menuRank == 2 && menuSelection == 2 && currentPage == UI_PAGE_ABOUT)
-            {
-                /* code */
-            }
-            else if (menuRank == 2 && menuSelection == 3 && currentPage == UI_PAGE_ABOUT)
-            {
-                /* code */
             }
 // #pragma endregion 关于部分
 // #pragma region 工具部分

@@ -46,4 +46,4 @@
 ../Core/Src/oled_ui.c:599:6:OLED_DrawProgressBar	3
 ../Core/Src/oled_ui.c:617:6:OLED_DrawRectangle	15
 ../Core/Src/oled_ui.c:706:6:OLED_DrawFilledRectangle	15
-../Core/Src/oled_ui.c:818:6:OLED_DrawIcon	14
+../Core/Src/oled_ui.c:818:6:OLED_DrawIcon	15

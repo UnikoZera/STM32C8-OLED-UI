@@ -6,7 +6,6 @@
  */
 
 #include "video_player.h"
-#include "goodapple.h"
 #include "flash.h"
 #include "oled.h"
 #include <stdbool.h>
