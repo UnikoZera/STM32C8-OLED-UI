@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := STM32PROJECT
+BUILD_ARTIFACT_NAME := STM32_OLED_UI
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-STM32PROJECT.elf \
+STM32_OLED_UI.elf \
 
 MAP_FILES += \
-STM32PROJECT.map \
+STM32_OLED_UI.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-STM32PROJECT.list \
+STM32_OLED_UI.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: STM32PROJECT.elf secondary-outputs
+main-build: STM32_OLED_UI.elf secondary-outputs
 
 # Tool invocations
-STM32PROJECT.elf STM32PROJECT.map: $(OBJS) $(USER_OBJS) D:\mcu\projects\STM32PROJECT\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32PROJECT.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\mcu\projects\STM32PROJECT\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32PROJECT.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32_OLED_UI.elf STM32_OLED_UI.map: $(OBJS) $(USER_OBJS) D:\mcu\projects\STM32_OLED_UI\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32_OLED_UI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\mcu\projects\STM32_OLED_UI\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32_OLED_UI.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-STM32PROJECT.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32PROJECT.list"
+STM32_OLED_UI.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32_OLED_UI.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) STM32PROJECT.elf STM32PROJECT.list STM32PROJECT.map default.size.stdout
+	-$(RM) STM32_OLED_UI.elf STM32_OLED_UI.list STM32_OLED_UI.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

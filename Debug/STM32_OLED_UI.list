@@ -1,5 +1,5 @@
 
-STM32PROJECT.elf:     file format elf32-littlearm
+STM32_OLED_UI.elf:     file format elf32-littlearm
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   0001ab70  00000000  00000000  00044ddb  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00090cba  00000000  00000000  0005f94b  2**0
+ 18 .debug_str    00090cbb  00000000  00000000  0005f94b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000f0605  2**0
+ 19 .comment      00000043  00000000  00000000  000f0606  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  0000661c  00000000  00000000  000f0648  2**2
+ 20 .debug_frame  0000661c  00000000  00000000  000f064c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000004b  00000000  00000000  000f6c64  2**0
+ 21 .debug_line_str 0000004c  00000000  00000000  000f6c68  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
