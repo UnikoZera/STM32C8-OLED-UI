@@ -1,5 +1,3 @@
-"./Core/Src/calculator.o"
-"./Core/Src/dma.o"
 "./Core/Src/drawer.o"
 "./Core/Src/flash.o"
 "./Core/Src/games.o"
@@ -11,7 +9,6 @@
 "./Core/Src/oled_driver.o"
 "./Core/Src/oled_optimize.o"
 "./Core/Src/oled_ui.o"
-"./Core/Src/pid.o"
 "./Core/Src/spi.o"
 "./Core/Src/stm32f1xx_hal_msp.o"
 "./Core/Src/stm32f1xx_it.o"

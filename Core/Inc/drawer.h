@@ -47,11 +47,13 @@ OLED_Transform OLED_CreateTransform(float angle_degrees, float scale, int16_t ce
 OLED_Transform OLED_CreateTransformAdvanced(float angle_degrees, float scale_x, float scale_y, int16_t center_x, int16_t center_y);
 
 // 3D立方体相关结构体和函数
-typedef struct {
+typedef struct
+{
     float x, y, z;
 } OLED_Point3D;
 
-typedef struct {
+typedef struct
+{
     float angle_x;    // 绕X轴旋转角度 (弧度)
     float angle_y;    // 绕Y轴旋转角度 (弧度)
     float angle_z;    // 绕Z轴旋转角度 (弧度)
@@ -61,10 +63,11 @@ typedef struct {
     float distance;   // 观察者距离 (影响透视效果)
 } OLED_Cube3D_Transform;
 
-typedef struct {
-    OLED_Point3D vertices[8];     // 立方体的8个顶点
-    int edges[12][2];             // 立方体的12条边 (每条边连接两个顶点)
-    float size;                   // 立方体大小
+typedef struct
+{
+    OLED_Point3D vertices[8];        // 立方体的8个顶点
+    int edges[12][2];                // 立方体的12条边 (每条边连接两个顶点)
+    float size;                      // 立方体大小
     OLED_Cube3D_Transform transform; // 变换参数
 } OLED_Cube3D;
 

@@ -7,7 +7,7 @@
 
 #ifndef INC_OLED_UI_H_
 #define INC_OLED_UI_H_
-#define MAX_ANIMATIONS 20 // Manager的最大动画数量(包含X、Y轴同时移动)
+#define MAX_ANIMATIONS 15 // Manager的最大动画数量(包含X、Y轴同时移动)
 
 #include "oled.h"
 #include "icon.h"

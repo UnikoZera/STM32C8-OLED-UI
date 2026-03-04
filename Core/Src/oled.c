@@ -10,12 +10,11 @@
 
 volatile uint32_t oled_last_update_time = 0;   // 上次更新显示的时间
 volatile uint8_t oled_update_flag = 0;         // 更新标志位
-volatile uint8_t oled_dma_busy = 0;            // DMA传输忙标志
 volatile uint8_t oled_dirty_pages[OLED_PAGES]; // 标记哪些页需要更新
 
 // 128 (宽) x 8 (页) = 1024 字节
-uint8_t OLED_BackBuffer[128 * 8];
-uint8_t OLED_FrontBuffer[128 * 8 + 1]; // 额外的字节用于I2C命令
+uint8_t OLED_BackBuffer[128 * 8];       // 显示后台缓冲区
+uint8_t OLED_FrontBuffer[128 * 8 + 1];  // 额外的字节用于I2C命令
 
 // ASCII 6x8 字体数组 (32-127字符)
 const uint8_t OLED_FONT_6x8[] = {
@@ -137,152 +136,69 @@ void OLED_InitBuffer(void)
 
     // 初始化状态变量
     oled_update_flag = OLED_READY;
-    oled_dma_busy = OLED_READY;
 
-    // 将所有页面标记为脏（需要更新）
-    for (uint8_t i = 0; i < OLED_PAGES; i++)
-    {
-        oled_dirty_pages[i] = 1;
-    }
+    memset(oled_dirty_pages, 1, sizeof(oled_dirty_pages));
 }
 
 // 清空缓冲区
 void OLED_ClearBuffer(void)
 {
-    // 重置缓冲区为全0 (全黑)
     memset(OLED_BackBuffer, 0, sizeof(OLED_BackBuffer));
-
-    // 将所有页面标记为脏（需要更新）
-    for (uint8_t i = 0; i < OLED_PAGES; i++)
-    {
-        oled_dirty_pages[i] = 1;
-    }
 }
 
 uint8_t OLED_IsBusy(void)
 {
-    // 如果标记为忙，检查是否已经过了足够时间
     if (oled_update_flag)
     {
-        // SSD1315/SSD1306 典型帧率约为60Hz，每帧约16.7ms
-        // 可以根据需要调整刷新率，减小此值可以提高帧率
         uint32_t current_time = HAL_GetTick();
         if (current_time - oled_last_update_time >= 0)
         {
             oled_update_flag = OLED_READY; // 已经过了足够时间，不再忙
         }
     }
-
-    // 如果DMA传输正在进行，也视为忙
-    return (oled_update_flag || oled_dma_busy);
+    return (oled_update_flag);
 }
 
 void OLED_UpdateDisplayVSync(void)
 {
-    // 等待上一次更新完成
-    while (OLED_IsBusy())
-    {
-        // 可以加入短暂延时或者让出CPU，但通常不会停留很久
-    }
-
-    oled_update_flag = OLED_BUSY;
-    oled_last_update_time = HAL_GetTick();
-
-    OLED_FrontBuffer[0] = 0x40;                                             // 数据控制字节：Co=0, D/C#=1 (数据)
-    memcpy(OLED_FrontBuffer + 1, OLED_BackBuffer, OLED_WIDTH * OLED_PAGES); // 复制当前缓冲区到前缓冲区
-
-    // 一次性发送所有命令
-    for (uint8_t i = 0; i < sizeof(cmds); i++)
-    {
-        OLED_SendCommand(cmds[i]);
-    }
-
-
-    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, OLED_WIDTH * OLED_PAGES + 1, HAL_MAX_DELAY);
-
-    // 重置所有脏页标记
-    for (uint8_t i = 0; i < OLED_PAGES; i++)
-    {
-        oled_dirty_pages[i] = 0;
-    }
-}
-
-// 使用DMA更新显示函数
-void OLED_UpdateDisplayDMA(void)
-{
-    // 如果DMA忙或者OLED忙，则返回
-    if (oled_dma_busy || oled_update_flag)
-    {
+    if (OLED_IsBusy())
         return;
-    }
-
     oled_update_flag = OLED_BUSY;
-    oled_dma_busy = OLED_BUSY;
     oled_last_update_time = HAL_GetTick();
-
-    // 前缓冲区的第一个字节设为数据控制字节
     OLED_FrontBuffer[0] = 0x40;                                             // 数据控制字节：Co=0, D/C#=1 (数据)
     memcpy(OLED_FrontBuffer + 1, OLED_BackBuffer, OLED_WIDTH * OLED_PAGES); // 复制当前缓冲区到前缓冲区
-
-    // 一次性发送所有命令
-    for (uint8_t i = 0; i < sizeof(cmds); i++)
-    {
-        OLED_SendCommand(cmds[i]);
-    }
-
-    // 使用DMA传输数据（非阻塞）
-    HAL_I2C_Master_Transmit_DMA(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, OLED_WIDTH * OLED_PAGES + 1);
-
-    // 重置所有脏页标记
-    for (uint8_t i = 0; i < OLED_PAGES; i++)
-    {
-        oled_dirty_pages[i] = 0;
-    }
+    uint8_t cmds[] = {
+        0x00,                     // Co=0, D/C#=0 (命令控制字节)
+        0x20, 0x00,               // 水平寻址模式
+        0x21, 0x00, 0x7F,         // 列地址范围: 0-127
+        0x22, 0x00, 0x07          // 页地址范围: 0-7
+    };
+    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, cmds, sizeof(cmds), HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, OLED_WIDTH * OLED_PAGES + 1, HAL_MAX_DELAY);
+    memset(oled_dirty_pages, 1, sizeof(oled_dirty_pages));
 }
 
-// 局部更新显示函数
+// 局部更新显示函数 (整页)
 void OLED_UpdateDisplayPartial(uint8_t startPage, uint8_t endPage)
 {
-    // 边界检查
     if (startPage >= OLED_PAGES || endPage >= OLED_PAGES || startPage > endPage)
         return;
 
-    // 等待上一次更新完成
-    while (OLED_IsBusy())
-    {
-        // 可以加入短暂延时或者让出CPU
-    }
+    if (OLED_IsBusy())
+        return;
 
     oled_update_flag = OLED_BUSY;
     oled_last_update_time = HAL_GetTick();
-
-    // 设置页地址范围
-    OLED_SendCommand(0x22);      // 页地址设置命令
-    OLED_SendCommand(startPage); // 起始页
-    OLED_SendCommand(endPage);   // 结束页
-
-    // 设置列地址范围（总是更新整行）
-    OLED_SendCommand(0x21); // 列地址设置命令
-    OLED_SendCommand(0x00); // 起始列
-    OLED_SendCommand(0x7F); // 结束列 (127)
-
-    // 计算需要传输的数据长度
+    uint8_t partial_cmds[] = {
+        0x00,                     // Co=0, D/C#=0 (命令控制字节)
+        0x22, startPage, endPage, // 页地址设置命令及范围
+        0x21, 0x00, 0x7F          // 列地址设置命令及范围 (总是更新一整行)
+    };
+    HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, partial_cmds, sizeof(partial_cmds), HAL_MAX_DELAY);
     uint16_t dataLen = OLED_WIDTH * (endPage - startPage + 1);
-
-    // 前缓冲区的第一个字节设为数据控制字节
     OLED_FrontBuffer[0] = 0x40; // 数据控制字节：Co=0, D/C#=1 (数据)
-
-    // 只复制需要更新的页
-    for (uint8_t page = startPage; page <= endPage; page++)
-    {
-        memcpy(
-            OLED_FrontBuffer + 1 + (page - startPage) * OLED_WIDTH,
-            OLED_BackBuffer + page * OLED_WIDTH,
-            OLED_WIDTH);
-        oled_dirty_pages[page] = 0; // 重置脏页标记
-    }
-
-    // 发送数据
+    memcpy(OLED_FrontBuffer + 1, OLED_BackBuffer + startPage * OLED_WIDTH, dataLen);
+    memset((void*)&oled_dirty_pages[startPage], 0, endPage - startPage + 1);
     HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDR << 1, OLED_FrontBuffer, dataLen + 1, HAL_MAX_DELAY);
 }
 

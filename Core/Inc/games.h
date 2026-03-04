@@ -68,9 +68,9 @@ void Snake_HandleInput(Direction input_dir); // 假设我们有一个方式来�
 
 #define GAME_BOARD_DISPLAY_HEIGHT (OLED_HEIGHT - 8) // Reserve 8px for score line, so 56px for board
 // Adjusted TILE_WIDTH and TILE_HEIGHT for 4x4 board
-#define GAME2048_TILE_WIDTH (OLED_WIDTH / GAME2048_BOARD_SIZE) 
+#define GAME2048_TILE_WIDTH (OLED_WIDTH / GAME2048_BOARD_SIZE)
 #define GAME2048_TILE_HEIGHT (GAME_BOARD_DISPLAY_HEIGHT / GAME2048_BOARD_SIZE)
-#define GAME2048_TILE_PADDING 1                               // Padding around tiles
+#define GAME2048_TILE_PADDING 1 // Padding around tiles
 
 typedef struct
 {
