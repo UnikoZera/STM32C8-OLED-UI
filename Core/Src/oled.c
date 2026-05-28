@@ -146,16 +146,16 @@ void OLED_ClearBuffer(void)
     memset(OLED_BackBuffer, 0, sizeof(OLED_BackBuffer));
 }
 
+void HAL_I2C_TxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+    if (hi2c->Instance == hi2c1.Instance)
+    {
+        oled_update_flag = OLED_READY;
+    }
+}
+
 uint8_t OLED_IsBusy(void)
 {
-    if (oled_update_flag)
-    {
-        uint32_t current_time = HAL_GetTick();
-        if (current_time - oled_last_update_time >= 0)
-        {
-            oled_update_flag = OLED_READY; // 已经过了足够时间，不再忙
-        }
-    }
     return (oled_update_flag);
 }
 
